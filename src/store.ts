@@ -1,16 +1,20 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { GraphViewModule } from 'occubrow-graph-view';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {
+    state: {
 
-  },
-  mutations: {
+    },
+    mutations: {
 
-  },
-  actions: {
+    },
+    actions: {
 
-  },
+    },
+    modules: {
+        graphView: GraphViewModule
+    }
 });
