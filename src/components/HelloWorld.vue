@@ -1,6 +1,7 @@
 <template>
-  <div class="hello">
-    <svg width="600" :height="600">
+<div class="page">
+  <div class="graph">
+    <svg id="svg-frame" width="600" height="600">
       <graph-view :width="600"
                   :height="600"
                   :x-margin="162"
@@ -11,11 +12,15 @@
                   :graph-data="fakeGraphData"></graph-view>
     </svg>
   </div>
+</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
+import TreeModel from 'tree-model';
+import 'occubrow-graph-view/dist/occubrow-graph-view.css';
+
 
 const FAKE_API_DATA = {
     "children": [
@@ -97,24 +102,62 @@ export default Vue.extend({
             fakeGraphData: FAKE_API_DATA
         };
     },
+    created() {
+        console.log("inside created hook");
+        const treeModelConfig = {childrenPropertyName: 'children'};
+        const apiTree = new TreeModel(treeModelConfig);
+        const apiRoot = apiTree.parse(STATIC_TAXONOMY_DATA as any);
+        this.$store.commit('setTaxonomyModel', apiRoot);
+    },
     components: {GraphView}
 });
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="less">
-h3 {
-  margin: 40px 0 0;
+<style lang="less">
+@font-face {
+    font-family: 'Oxygen';
+    src: url("/static/fonts/Oxygen-Regular.ttf");
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+body {
+    background-color: #fdfdfd;
+    font-family: 'Oxygen', sans-serif;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+div.page {
+    display: grid;
+    grid-template-columns: repeat(12, [col-start] 1fr);
 }
-a {
-  color: #42b983;
+
+div.taxonomy {
+    grid-row: 2;
+    height: 8em;
+    grid-column: col-start / span 12;
+    margin: 1em;
+}
+
+div.graph {
+    grid-row: 4;
+    grid-column: col-start 4 / span 4;
+}
+
+.glyph {
+    fill: red;
+}
+
+/* The svg frame is 'pinned', taken outside of the flow layout, and occupies 
+   the entire page. */
+#svg-frame {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+    width: 100vw;
+    height: 100vh;
+
+    /* It's gotta have such a z-index, otherwise it will block HTML items from
+       being interacted with. */
+    z-index: -1;
 }
 </style>
