@@ -1,6 +1,8 @@
 <template>
 <div class="page">
-  <widget-view :taxonomies="taxonomies"></widget-view>
+  <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
+
+  <button v-on:click="doIt">Do it</button>
 
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
@@ -159,6 +161,14 @@ export default Vue.extend({
         const apiRoot = apiTree.parse(STATIC_TAXONOMY_DATA as any);
         this.$store.commit('setTaxonomyModel', apiRoot);
     },
+    methods: {
+        doIt() {
+            console.log("doing it");
+            console.log("widget view is %o", this.$refs.widgetView);
+            const foo = this.$refs.widgetView as any;
+            console.log("result was %o", foo.meaningOfLife());
+        }
+    }
 });
 </script>
 
