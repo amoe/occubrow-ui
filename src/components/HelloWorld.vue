@@ -1,6 +1,6 @@
 <template>
 <div class="page">
-  <widget-view></widget-view>
+  <widget-view :taxonomies="taxonomies"></widget-view>
 
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
@@ -24,6 +24,47 @@ import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
+
+
+const MUSIC_TAXONOMY_JSON = {
+    'children': [{'content': 'Rock', 'id': 1, 'label': 'Taxon',
+                  'children': [{'content': 'Metal', 'id': 3, 'label': 'Taxon'}]},
+                 {'content': 'Classical', 'id': 2, 'label': 'Taxon',
+                  'children': [{'content': 'Baroque', 'id': 4, 'label': 'Taxon'}]}],
+    'content': 'Music',
+    'id': 0,
+    'label': 'Taxon'
+};
+
+const OCCUPATION_TAXONOMY_JSON = {
+    'children': [{'content': 'Manufacturing', 'id': 1, 'label': 'Taxon',
+                  'children': [
+                      {'content': 'Wood workers',
+                       'id': 2, 
+                       'label': 'Taxon', 
+                       'children': [
+                           {'content': 'Bandbox-maker',
+                            'id': 3,
+                            'label': 'Taxon'}
+                       ]}
+                  ]}],
+
+    'content': 'Occupation',
+    'id': 0,
+    'label': 'Taxon'
+};
+
+const PLACE_TAXONOMY_JSON = {
+    'children': [{'content': 'Country', 'id': 1, 'label': 'Taxon',
+                  'children': [
+                      {'content': 'France',
+                       'id': 2, 
+                       'label': 'Taxon'}]
+                 }],
+    'content': 'Place',
+    'id': 0,
+    'label': 'Taxon'
+};
 
 
 const FAKE_API_DATA = {
@@ -104,7 +145,11 @@ export default Vue.extend({
     data() {
         return {
             fakeGraphData: FAKE_API_DATA,
-            taxonomies: {}
+            taxonomies: {
+                'Music': MUSIC_TAXONOMY_JSON,
+                'Occupation': OCCUPATION_TAXONOMY_JSON,
+                'Place': PLACE_TAXONOMY_JSON
+            }
         };
     },
     created() {
