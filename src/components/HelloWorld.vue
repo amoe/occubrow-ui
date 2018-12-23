@@ -1,5 +1,7 @@
 <template>
 <div class="page">
+  <widget-view></widget-view>
+
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
       <graph-view :width="600"
@@ -18,8 +20,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
+import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
+import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 
 const FAKE_API_DATA = {
@@ -96,10 +100,11 @@ const STATIC_TAXONOMY_DATA = {
 };
 
 export default Vue.extend({
-    name: 'HelloWorld',
+    components: {GraphView, WidgetView},
     data() {
         return {
-            fakeGraphData: FAKE_API_DATA
+            fakeGraphData: FAKE_API_DATA,
+            taxonomies: {}
         };
     },
     created() {
@@ -109,7 +114,6 @@ export default Vue.extend({
         const apiRoot = apiTree.parse(STATIC_TAXONOMY_DATA as any);
         this.$store.commit('setTaxonomyModel', apiRoot);
     },
-    components: {GraphView}
 });
 </script>
 
