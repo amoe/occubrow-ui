@@ -18,8 +18,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
+import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
+import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 
 const FAKE_API_DATA = {
