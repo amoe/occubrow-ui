@@ -166,7 +166,7 @@ export default Vue.extend({
             console.log("doing it");
             console.log("widget view is %o", this.$refs.widgetView);
             const foo = this.$refs.widgetView as any;
-            console.log("result was %o", foo.meaningOfLife());
+            console.log("result was %o", foo.getQuery());
         }
     }
 });
