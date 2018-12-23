@@ -1,5 +1,7 @@
 <template>
 <div class="page">
+  <widget-view></widget-view>
+
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
       <graph-view :width="600"
@@ -98,10 +100,11 @@ const STATIC_TAXONOMY_DATA = {
 };
 
 export default Vue.extend({
-    name: 'HelloWorld',
+    components: {GraphView, WidgetView},
     data() {
         return {
-            fakeGraphData: FAKE_API_DATA
+            fakeGraphData: FAKE_API_DATA,
+            taxonomies: {}
         };
     },
     created() {
@@ -111,7 +114,6 @@ export default Vue.extend({
         const apiRoot = apiTree.parse(STATIC_TAXONOMY_DATA as any);
         this.$store.commit('setTaxonomyModel', apiRoot);
     },
-    components: {GraphView}
 });
 </script>
 
