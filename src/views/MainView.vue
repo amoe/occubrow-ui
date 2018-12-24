@@ -24,6 +24,9 @@ import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
+import api from '@/lib/data';
+import {TreeNode} from '@/types';
+
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
@@ -69,36 +72,6 @@ const PLACE_TAXONOMY_JSON = {
 };
 
 
-const FAKE_API_DATA = {
-    "children": [
-        {
-            "children": [
-                {
-                    "id": "St.",
-                    "taxon": null
-                },
-                {
-                    "id": "waggon",
-                    "taxon": null
-                }
-            ],
-            "id": "the",
-            "taxon": null
-        },
-        {
-            "children": [
-                {
-                    "id": "shop",
-                    "taxon": null
-                }
-            ],
-            "id": "a",
-            "taxon": null
-        }
-    ],
-    "id": "keep",
-    "taxon": null
-};
 
 const STATIC_TAXONOMY_DATA = {
     "_type": "Taxon",
@@ -146,7 +119,7 @@ export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
         return {
-            fakeGraphData: FAKE_API_DATA,
+            fakeGraphData: null as TreeNode | null,
             taxonomies: {
                 'Music': MUSIC_TAXONOMY_JSON,
                 'Occupation': OCCUPATION_TAXONOMY_JSON,
@@ -155,6 +128,8 @@ export default Vue.extend({
         };
     },
     created() {
+        this.fakeGraphData = api.getTree();
+
         console.log("inside created hook");
         const treeModelConfig = {childrenPropertyName: 'children'};
         const apiTree = new TreeModel(treeModelConfig);
