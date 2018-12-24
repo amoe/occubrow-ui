@@ -13,7 +13,7 @@
                   :depth-offset="120"
                   :text-offset="22"
                   :breadth="360"
-                  :graph-data="fakeGraphData"></graph-view>
+                  :graph-data="graphData"></graph-view>
     </svg>
   </div>
 </div>
@@ -119,7 +119,7 @@ export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
         return {
-            fakeGraphData: null as TreeNode | null,
+            graphData: null as TreeNode | null,
             taxonomies: {
                 'Music': MUSIC_TAXONOMY_JSON,
                 'Occupation': OCCUPATION_TAXONOMY_JSON,
@@ -129,7 +129,7 @@ export default Vue.extend({
     },
     created() {
         api.getTree('keep').then(r => {
-            this.fakeGraphData = r.data;
+            this.graphData = r.data;
         });
 
         console.log("inside created hook");
