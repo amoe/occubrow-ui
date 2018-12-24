@@ -9,7 +9,7 @@
       <graph-view :width="600"
                   :height="600"
                   :x-margin="162"
-                  :y-margin="432"
+                  :y-margin="128"
                   :depth-offset="120"
                   :text-offset="22"
                   :breadth="360"
@@ -158,27 +158,6 @@ export default Vue.extend({
 body {
     background-color: #fdfdfd;
     font-family: 'Oxygen', sans-serif;
-}
-
-div.page {
-    display: grid;
-    grid-template-columns: repeat(12, [col-start] 1fr);
-}
-
-div.taxonomy {
-    grid-row: 2;
-    height: 8em;
-    grid-column: col-start / span 12;
-    margin: 1em;
-}
-
-div.graph {
-    grid-row: 4;
-    grid-column: col-start 4 / span 4;
-}
-
-.glyph {
-    fill: red;
 }
 
 /* The svg frame is 'pinned', taken outside of the flow layout, and occupies 
