@@ -128,7 +128,9 @@ export default Vue.extend({
         };
     },
     created() {
-        this.fakeGraphData = api.getTree();
+        api.getTree('keep').then(r => {
+            this.fakeGraphData = r.data;
+        });
 
         console.log("inside created hook");
         const treeModelConfig = {childrenPropertyName: 'children'};
