@@ -4,6 +4,8 @@ import router from './router';
 import store from './store';
 import { GraphView, GraphViewModule } from 'occubrow-graph-view';
 
+require('typeface-oxygen');
+
 Vue.config.productionTip = false;
 
 new Vue({

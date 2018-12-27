@@ -2,7 +2,7 @@
 <div class="page">
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
 
-  <button v-on:click="doIt">Do it</button>
+  <button v-on:click="doIt">Get serialized query</button>
 
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
@@ -12,6 +12,7 @@
                   :y-margin="128"
                   :depth-offset="120"
                   :text-offset="22"
+                  :text-content-template="textContentTemplate"
                   :breadth="360"
                   :graph-data="graphData"></graph-view>
     </svg>
@@ -119,6 +120,7 @@ export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
         return {
+            textContentTemplate: "{{content}}",
             graphData: null as TreeNode | null,
             taxonomies: {
                 'Music': MUSIC_TAXONOMY_JSON,
@@ -142,8 +144,8 @@ export default Vue.extend({
         doIt() {
             console.log("doing it");
             console.log("widget view is %o", this.$refs.widgetView);
-            const foo = this.$refs.widgetView as any;
-            console.log("result was %o", foo.getQuery());
+            const query = this.$refs.widgetView as any;
+            console.log("result was %o", JSON.stringify(query.getQuery(), null, 4));
         }
     }
 });
@@ -152,7 +154,6 @@ export default Vue.extend({
 <style lang="less">
 @font-face {
     font-family: 'Oxygen';
-    src: url("/static/fonts/Oxygen-Regular.ttf");
 }
 
 body {
