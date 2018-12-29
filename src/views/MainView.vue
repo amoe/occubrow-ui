@@ -6,22 +6,23 @@
 
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
-      <graph-view :width="600"
+      <graph-view v-if="isDataLoaded"
+                  :graph-data="graphData"
+                  :width="600"
                   :height="600"
                   :x-margin="162"
                   :y-margin="128"
                   :depth-offset="120"
                   :text-offset="22"
                   :text-content-template="textContentTemplate"
-                  :breadth="360"
-                  :graph-data="graphData"></graph-view>
+                  :breadth="360"></graph-view>
     </svg>
   </div>
 </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+    import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
@@ -54,7 +55,7 @@ const OCCUPATION_TAXONOMY_JSON = {
                             'label': 'Taxon'}
                        ]}
                   ]}],
-
+    
     'content': 'Occupation',
     'id': 0,
     'label': 'Taxon'
@@ -133,16 +134,15 @@ export default Vue.extend({
         api.getTree('keep').then(r => {
             this.graphData = r.data;
         });
-
+        
         api.getTaxonomy('Occupation').then(r => {
             console.log("loaded taxonomy %o", r.data);
+            console.log("inside created hook");
+            const treeModelConfig = {childrenPropertyName: 'children'};
+            const apiTree = new TreeModel(treeModelConfig);
+            const apiRoot = apiTree.parse(r.data);
+            this.$store.commit('setTaxonomyModel', apiRoot);
         });
-
-        console.log("inside created hook");
-        const treeModelConfig = {childrenPropertyName: 'children'};
-        const apiTree = new TreeModel(treeModelConfig);
-        const apiRoot = apiTree.parse(STATIC_TAXONOMY_DATA as any);
-        this.$store.commit('setTaxonomyModel', apiRoot);
     },
     methods: {
         doIt() {
@@ -150,6 +150,11 @@ export default Vue.extend({
             console.log("widget view is %o", this.$refs.widgetView);
             const query = this.$refs.widgetView as any;
             console.log("result was %o", JSON.stringify(query.getQuery(), null, 4));
+        }
+    },
+    computed: {
+        isDataLoaded(): boolean {
+            return this.graphData !== null;
         }
     }
 });
