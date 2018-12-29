@@ -134,6 +134,10 @@ export default Vue.extend({
             this.graphData = r.data;
         });
 
+        api.getTaxonomy('Occupation').then(r => {
+            console.log("loaded taxonomy %o", r.data);
+        });
+
         console.log("inside created hook");
         const treeModelConfig = {childrenPropertyName: 'children'};
         const apiTree = new TreeModel(treeModelConfig);
