@@ -2,7 +2,7 @@
 <div class="page">
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
 
-  <button v-on:click="doIt">Get serialized query</button>
+  <button v-on:click="getSerializedQuery">Get serialized query</button>
 
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
@@ -33,6 +33,7 @@ import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 
+
 export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
@@ -53,9 +54,12 @@ export default Vue.extend({
         });
     },
     methods: {
-        doIt() {
+        getSerializedQuery() {
             console.log("doing it");
             console.log("widget view is %o", this.$refs.widgetView);
+
+            // Cast to any is a hack, we don't have the correct typing for
+            // widgetView
             const query = this.$refs.widgetView as any;
             console.log("result was %o", JSON.stringify(query.getQuery(), null, 4));
         }
