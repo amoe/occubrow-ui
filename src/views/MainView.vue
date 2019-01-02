@@ -33,101 +33,13 @@ import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 
-const MUSIC_TAXONOMY_JSON = {
-    'children': [{'content': 'Rock', 'id': 1, 'label': 'Taxon',
-                  'children': [{'content': 'Metal', 'id': 3, 'label': 'Taxon'}]},
-                 {'content': 'Classical', 'id': 2, 'label': 'Taxon',
-                  'children': [{'content': 'Baroque', 'id': 4, 'label': 'Taxon'}]}],
-    'content': 'Music',
-    'id': 0,
-    'label': 'Taxon'
-};
-
-const OCCUPATION_TAXONOMY_JSON = {
-    'children': [{'content': 'Manufacturing', 'id': 1, 'label': 'Taxon',
-                  'children': [
-                      {'content': 'Wood workers',
-                       'id': 2, 
-                       'label': 'Taxon', 
-                       'children': [
-                           {'content': 'Bandbox-maker',
-                            'id': 3,
-                            'label': 'Taxon'}
-                       ]}
-                  ]}],
-    
-    'content': 'Occupation',
-    'id': 0,
-    'label': 'Taxon'
-};
-
-const PLACE_TAXONOMY_JSON = {
-    'children': [{'content': 'Country', 'id': 1, 'label': 'Taxon',
-                  'children': [
-                      {'content': 'France',
-                       'id': 2, 
-                       'label': 'Taxon'}]
-                 }],
-    'content': 'Place',
-    'id': 0,
-    'label': 'Taxon'
-};
-
-
-
-const STATIC_TAXONOMY_DATA = {
-    "_type": "Taxon",
-    "children": [
-        {
-            "_type": "Taxon",
-            "children": [
-                {
-                    "_type": "Taxon",
-                    "id": 63754,
-                    "name": "Deepstaria enigmatica"
-                },
-                {
-                    "_type": "Taxon",
-                    "id": 63759,
-                    "name": "Deepstaria reticulum"
-                }
-            ],
-            "id": 63752,
-            "name": "Deepstaria"
-        },
-        {
-            "_type": "Taxon",
-            "children": [
-                {
-                    "_type": "Taxon",
-                    "id": 63760,
-                    "name": "Aurelia labiata"
-                },
-                {
-                    "_type": "Taxon",
-                    "id": 63761,
-                    "name": "Aurelia aurita"
-                }
-            ],
-            "id": 63753,
-            "name": "Aurelia"
-        }
-    ],
-    "id": 63751,
-    "name": "Ulmaridae"
-};
-
 export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
         return {
             textContentTemplate: "{{content}}",
             graphData: null as TreeNode | null,
-            taxonomies: {
-                'Music': MUSIC_TAXONOMY_JSON,
-                'Occupation': OCCUPATION_TAXONOMY_JSON,
-                'Place': PLACE_TAXONOMY_JSON
-            }
+            taxonomies: {} 
         };
     },
     created() {
@@ -137,11 +49,7 @@ export default Vue.extend({
         
         api.getTaxonomy('Occupation').then(r => {
             console.log("loaded taxonomy %o", r.data);
-            console.log("inside created hook");
-            const treeModelConfig = {childrenPropertyName: 'children'};
-            const apiTree = new TreeModel(treeModelConfig);
-            const apiRoot = apiTree.parse(r.data);
-            this.$store.commit('setTaxonomyModel', apiRoot);
+            this.taxonomies['Occupation'] = r.data;
         });
     },
     methods: {
