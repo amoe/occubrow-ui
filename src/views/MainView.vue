@@ -40,7 +40,7 @@ export default Vue.extend({
         return {
             textContentTemplate: "{{content}}",
             graphData: null as TreeNode | null,
-            taxonomies: {} 
+            taxonomies: {}
         };
     },
     created() {
