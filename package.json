@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "amoe-butterworth-widgets": "^0.5.4",
-    "occubrow-graph-view": "^0.3.0",
+    "occubrow-graph-view": "^0.4.0",
     "typeface-oxygen": "0.0.54",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
