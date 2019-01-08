@@ -4,13 +4,13 @@
 
   <button v-on:click="getSerializedQuery">Get serialized query</button>
 
-  <div class="graph">
-    <svg id="svg-frame" width="600" height="600">
+  <el-main>
+    <svg id="svg-frame" :width="width" :height="height">
       <graph-view v-if="isDataLoaded"
                   v-on:node-clicked="handleNodeClicked"
                   :graph-data="graphData"
-                  :width="600"
-                  :height="600"
+                  :width="width"
+                  :height="height"
                   :x-margin="162"
                   :y-margin="128"
                   :depth-offset="120"
@@ -18,7 +18,11 @@
                   :text-content-template="textContentTemplate"
                   :breadth="360"></graph-view>
     </svg>
-  </div>
+  </el-main>
+
+  <el-footer>
+    AGPL 2019
+  </el-footer>
 </div>
 </template>
 
@@ -39,7 +43,9 @@ export default Vue.extend({
         return {
             textContentTemplate: "{{content}}",
             graphData: null as TreeNode | null,
-            taxonomies: {}
+            taxonomies: {} as any,
+            width: 600,
+            height: 600
         };
     },
     created() {
@@ -53,7 +59,7 @@ export default Vue.extend({
         });
     },
     methods: {
-        handleNodeClicked(node) {
+        handleNodeClicked(node: any) {   // it's actually a GVNode
             console.log("node clicked: %o", node);
             api.getTree(node.data.content).then(r => {
                 this.graphData = r.data;
