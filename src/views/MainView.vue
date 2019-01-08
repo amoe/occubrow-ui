@@ -7,6 +7,7 @@
   <div class="graph">
     <svg id="svg-frame" width="600" height="600">
       <graph-view v-if="isDataLoaded"
+                  v-on:node-clicked="handleNodeClicked"
                   :graph-data="graphData"
                   :width="600"
                   :height="600"
@@ -32,8 +33,6 @@ import {TreeNode} from '@/types';
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
-
-
 export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
@@ -54,6 +53,12 @@ export default Vue.extend({
         });
     },
     methods: {
+        handleNodeClicked(node) {
+            console.log("node clicked: %o", node);
+            api.getTree(node.data.content).then(r => {
+                this.graphData = r.data;
+            });
+        },
         getSerializedQuery() {
             console.log("doing it");
             console.log("widget view is %o", this.$refs.widgetView);
