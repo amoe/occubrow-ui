@@ -21,18 +21,20 @@
   </el-main>
 
   <el-footer>
-    AGPL 2019
+    AGPL 2019  {{currentRoot}}
   </el-footer>
 </div>
 </template>
 
 <script lang="ts">
-    import Vue from 'vue';
+import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
 import api from '@/lib/data';
 import {TreeNode} from '@/types';
+import {mapGetters} from 'vuex';
+import mc from '@/mutation-constants';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
@@ -45,11 +47,12 @@ export default Vue.extend({
             graphData: null as TreeNode | null,
             taxonomies: {} as any,
             width: 600,
-            height: 600
+            height: 600,
+            depthLimit: 4
         };
     },
     created() {
-        api.getTree('keep').then(r => {
+        api.getTree(this.currentRoot, this.depthLimit).then(r => {
             this.graphData = r.data;
         });
         
@@ -60,8 +63,8 @@ export default Vue.extend({
     },
     methods: {
         handleNodeClicked(node: any) {   // it's actually a GVNode
-            console.log("node clicked: %o", node);
-            api.getTree(node.data.content).then(r => {
+            this.$store.commit(mc.SET_ROOT, node.data.content);
+            api.getTree(this.currentRoot, this.depthLimit).then(r => {
                 this.graphData = r.data;
             });
         },
@@ -76,6 +79,9 @@ export default Vue.extend({
         }
     },
     computed: {
+        currentRoot(): string {
+            return this.$store.getters.currentRoot;
+        },
         isDataLoaded(): boolean {
             return this.graphData !== null;
         }

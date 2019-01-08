@@ -3,3 +3,7 @@ export interface TreeNode {
     id: string;
     taxon: number | null;
 }
+
+export interface OccubrowUIState {
+    rootHistory: string[];
+}
