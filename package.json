@@ -11,7 +11,7 @@
   "dependencies": {
     "amoe-butterworth-widgets": "^0.5.5",
     "element-ui": "^2.4.11",
-    "occubrow-graph-view": "^0.5.1",
+    "occubrow-graph-view": "^0.5.2",
     "typeface-oxygen": "0.0.54",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
