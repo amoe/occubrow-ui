@@ -56,9 +56,13 @@ export default Vue.extend({
             this.graphData = r.data;
         });
         
-        api.getTaxonomy('Occupation').then(r => {
+        api.getTaxonomy('Theme').then(r => {
             console.log("loaded taxonomy %o", r.data);
-            this.taxonomies['Occupation'] = r.data;
+            this.taxonomies['Theme'] = r.data;
+        });
+
+        api.getMetrics().then(r => {
+            console.log("metric %o", r.data);
         });
     },
     methods: {

@@ -2,6 +2,9 @@ import { TreeNode } from '@/types';
 import axios, { AxiosPromise } from 'axios';
 
 const api = {
+    getMetrics(): AxiosPromise {
+        return axios.get("/api/metrics");
+    },
     getTree(root: string, depthLimit: number): AxiosPromise {
         return axios.get(
             "/api/tree", {
