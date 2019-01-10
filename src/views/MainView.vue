@@ -34,7 +34,7 @@ import TreeModel from 'tree-model';
 import {mapGetters} from 'vuex';
 import mc from '@/mutation-constants';
 import api from '@/lib/data';
-import {TreeNode, WidgetViewComponent} from '@/types';
+import {TreeNode, WidgetViewComponent, TaxonomyRootDatum} from '@/types';
 import {isWidgetViewComponent} from '@/type-guards';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
@@ -53,13 +53,20 @@ export default Vue.extend({
         };
     },
     created() {
-        api.getTree(this.currentRoot, this.depthLimit).then(r => {
+        api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
             this.graphData = r.data;
-        });
-        
-        api.getTaxonomy('Theme').then(r => {
-            console.log("loaded taxonomy %o", r.data);
-            this.taxonomies['Theme'] = r.data;
+        })
+
+        api.getTaxonomyRoots().then(r => {
+            const taxonomyList: TaxonomyRootDatum[] = r.data;
+
+            for (let t of taxonomyList) {
+                const taxonomyName = t.content;
+
+                api.getTaxonomy(taxonomyName).then(r => {
+                    this.taxonomies[taxonomyName] = r.data;
+                });
+            }
         });
 
         api.getMetrics().then(r => {

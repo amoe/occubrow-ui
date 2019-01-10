@@ -11,3 +11,9 @@ export interface OccubrowUIState {
 export interface WidgetViewComponent {
     getQuery(): any;
 };
+
+
+export interface TaxonomyRootDatum {
+    uri: string;
+    content: string;
+}

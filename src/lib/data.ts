@@ -2,6 +2,9 @@ import { TreeNode } from '@/types';
 import axios, { AxiosPromise } from 'axios';
 
 const api = {
+    getRandomRoot(): AxiosPromise {
+        return axios.get("/api/random-root");
+    },
     getMetrics(): AxiosPromise {
         return axios.get("/api/metrics");
     },
@@ -17,6 +20,9 @@ const api = {
     getTaxonomy(root: string): AxiosPromise {
         return axios.get("/api/taxonomy", { params: { root } });
     },
+    getTaxonomyRoots(): AxiosPromise {
+        return axios.get("/api/taxonomy-roots");
+    }
 };
 
 export default api;
