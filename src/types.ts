@@ -7,3 +7,7 @@ export interface TreeNode {
 export interface OccubrowUIState {
     rootHistory: string[];
 }
+
+export interface WidgetViewComponent {
+    getQuery(): any;
+};
