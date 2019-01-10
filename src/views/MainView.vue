@@ -1,5 +1,10 @@
 <template>
 <div class="page">
+  <el-header>
+    
+
+  </el-header>
+  
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
 
   <button v-on:click="getSerializedQuery">Get serialized query</button>
@@ -40,6 +45,17 @@ import {isWidgetViewComponent} from '@/type-guards';
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
+
+
+const SAMPLE_REQUESTED_QUERY = [
+    {
+        "taxonomyRef": "Object",
+        "selectedPath": [
+            "tag:solasistim.net,2018-12-28:occubrow/Vehicle/1"
+        ]
+    }
+]
+
 export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
@@ -49,13 +65,21 @@ export default Vue.extend({
             taxonomies: {} as any,
             width: 600,
             height: 600,
-            depthLimit: 2
+            depthLimit: 2,
+            useRandomRoot: false
         };
     },
     created() {
-        api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
-            this.graphData = r.data;
-        })
+        // Hacky stuff
+        if (this.useRandomRoot) {
+            api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
+                this.graphData = r.data;
+            })
+        } else {
+            api.getTree(this.currentRoot, this.depthLimit).then(r => {
+                this.graphData = r.data;
+            });
+        }
 
         api.getTaxonomyRoots().then(r => {
             const taxonomyList: TaxonomyRootDatum[] = r.data;
