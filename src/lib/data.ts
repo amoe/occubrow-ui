@@ -1,4 +1,4 @@
-import { TreeNode } from '@/types';
+import { TreeNode, QuerySpec } from '@/types';
 import axios, { AxiosPromise } from 'axios';
 
 const api = {
@@ -22,6 +22,9 @@ const api = {
     },
     getTaxonomyRoots(): AxiosPromise {
         return axios.get("/api/taxonomy-roots");
+    },
+    submitTokenQuery(token: string, query: string[]): AxiosPromise {
+        return axios.get("/api/query", { params: { root: token, filter: null } })
     }
 };
 

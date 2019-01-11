@@ -17,3 +17,8 @@ export interface TaxonomyRootDatum {
     uri: string;
     content: string;
 }
+
+export interface QuerySpec {
+    taxonomyRef: string;
+    selectedPath: string[];
+}

@@ -39,8 +39,9 @@ import TreeModel from 'tree-model';
 import {mapGetters} from 'vuex';
 import mc from '@/mutation-constants';
 import api from '@/lib/data';
-import {TreeNode, WidgetViewComponent, TaxonomyRootDatum} from '@/types';
+import {TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec} from '@/types';
 import {isWidgetViewComponent} from '@/type-guards';
+import {last} from '@/util';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
@@ -56,6 +57,10 @@ const SAMPLE_REQUESTED_QUERY = [
     }
 ]
 
+function processQuery(query: QuerySpec[] ): string[] {
+    return query.map(s => last(s.selectedPath));
+}
+
 export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
@@ -66,20 +71,25 @@ export default Vue.extend({
             width: 600,
             height: 600,
             depthLimit: 2,
-            useRandomRoot: false
+            useRandomRoot: false,
+            currentQuery: SAMPLE_REQUESTED_QUERY as QuerySpec[]
         };
     },
     created() {
         // Hacky stuff
-        if (this.useRandomRoot) {
-            api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
-                this.graphData = r.data;
-            })
-        } else {
-            api.getTree(this.currentRoot, this.depthLimit).then(r => {
-                this.graphData = r.data;
-            });
-        }
+        // if (this.useRandomRoot) {
+        //     api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
+        //         this.graphData = r.data;
+        //     })
+        // } else {
+        //     api.getTree(this.currentRoot, this.depthLimit).then(r => {
+        //         this.graphData = r.data;
+        //     });
+        // }
+
+        api.submitTokenQuery(this.currentRoot, processQuery(this.currentQuery)).then(r => {
+            console.log("backend responded %o", r.data);
+        });
 
         api.getTaxonomyRoots().then(r => {
             const taxonomyList: TaxonomyRootDatum[] = r.data;
