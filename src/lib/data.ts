@@ -24,7 +24,8 @@ const api = {
         return axios.get("/api/taxonomy-roots");
     },
     submitTokenQuery(token: string, query: string[]): AxiosPromise {
-        return axios.get("/api/query", { params: { root: token, filter: null } })
+        console.log("i would submit query %o", query);
+        return axios.get("/api/query", { params: { root: token, filter: query } })
     }
 };
 

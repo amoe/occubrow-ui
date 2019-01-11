@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+    import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
@@ -42,24 +42,17 @@ import api from '@/lib/data';
 import {TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec} from '@/types';
 import {isWidgetViewComponent} from '@/type-guards';
 import {last} from '@/util';
+import {debounce} from 'lodash';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 
-
-const SAMPLE_REQUESTED_QUERY = [
-    {
-        "taxonomyRef": "Object",
-        "selectedPath": [
-            "tag:solasistim.net,2018-12-28:occubrow/Vehicle/1"
-        ]
-    }
-]
-
 function processQuery(query: QuerySpec[] ): string[] {
     return query.map(s => last(s.selectedPath));
 }
+
+const QUERY_DEBOUNCE_TIMEOUT = 10000;
 
 export default Vue.extend({
     components: {GraphView, WidgetView},
@@ -71,11 +64,11 @@ export default Vue.extend({
             width: 600,
             height: 600,
             depthLimit: 2,
-            useRandomRoot: false,
-            currentQuery: SAMPLE_REQUESTED_QUERY as QuerySpec[]
+            useRandomRoot: false
         };
     },
     created() {
+        
         // Hacky stuff
         // if (this.useRandomRoot) {
         //     api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
@@ -86,28 +79,36 @@ export default Vue.extend({
         //         this.graphData = r.data;
         //     });
         // }
-
-        api.submitTokenQuery(this.currentRoot, processQuery(this.currentQuery)).then(r => {
-            console.log("backend responded %o", r.data);
-        });
-
+        
+        // We obviously don't want to ALWAYS apply the filter.  So the best option
+        // would be to be able to register on some sort of getter in the module.
+        
         api.getTaxonomyRoots().then(r => {
             const taxonomyList: TaxonomyRootDatum[] = r.data;
-
+            
             for (let t of taxonomyList) {
                 const taxonomyName = t.content;
-
+                
                 api.getTaxonomy(taxonomyName).then(r => {
                     this.taxonomies[taxonomyName] = r.data;
                 });
             }
         });
-
+        
         api.getMetrics().then(r => {
             console.log("metric %o", r.data);
         });
     },
     methods: {
+        respondToQueryNotDebounced() {
+            console.log("responding to query");
+
+            api.submitTokenQuery(
+                this.currentRoot, processQuery(this.serializedQuery)
+            ).then(r => {
+                this.graphData = r.data;
+            });
+        },
         handleNodeClicked(node: any) {   // it's actually a GVNode
             this.$store.commit(mc.SET_ROOT, node.data.content);
             api.getTree(this.currentRoot, this.depthLimit).then(r => {
@@ -121,7 +122,16 @@ export default Vue.extend({
             console.log("Query was %o", JSON.stringify(widgetView.getQuery(), null, 4));
         }
     },
+    watch: {
+        serializedQuery(newVal, oldVal) {
+            console.log("inside serialized query watcher");
+            this.respondToQueryNotDebounced();
+        }
+    },
     computed: {
+        serializedQuery(): QuerySpec[] {
+            return this.$store.getters.serializedQuery;
+        },
         currentRoot(): string {
             return this.$store.getters.currentRoot;
         },
