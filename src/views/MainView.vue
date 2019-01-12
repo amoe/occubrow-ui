@@ -3,6 +3,16 @@
     <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
 
   <el-main>
+    
+
+    <el-popover placement="bottom"
+                :title="popoverTitle"
+                width="200"
+                trigger="manual"
+                content="this is content, this is content, this is content"
+                v-model="popoverVisible"/>
+
+
     <svg id="svg-frame" :width="width * 2" :height="height">
       <graph-view v-if="isDataLoaded"
                   v-on:node-clicked="handleNodeClicked"
@@ -60,7 +70,9 @@ export default Vue.extend({
             height: 600,
             depthLimit: 2,
             useRandomRoot: false,
-            metrics: null as any   // FIXME: type
+            metrics: null as any,   // FIXME: type
+            popoverVisible: false,
+            popoverTitle: null as (string | null)
         };
     },
     created() {
@@ -116,6 +128,8 @@ export default Vue.extend({
         handleNodeClicked(node: any) {   // it's actually a GVNode
             this.$store.commit(mc.SET_ROOT, node.data.content);
 
+            this.popoverVisible = !this.popoverVisible;
+            this.popoverTitle = node.data.content;
 
             // api.getTree(this.currentRoot, this.depthLimit).then(r => {
             //     this.graphData = r.data;
