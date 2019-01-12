@@ -19,7 +19,8 @@
   </el-main>
 
   <el-footer>
-    AGPL 2019  {{currentRoot}}
+    Order: {{metrics.order}}.  Size: {{metrics.size}}.  
+    AGPL 2019
   </el-footer>
 </div>
 </template>
@@ -40,7 +41,6 @@ import {debounce} from 'lodash';
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
-
 function processQuery(query: QuerySpec[] ): string[] {
     return query.map(s => last(s.selectedPath));
 }
@@ -57,7 +57,8 @@ export default Vue.extend({
             width: 600,
             height: 600,
             depthLimit: 2,
-            useRandomRoot: false
+            useRandomRoot: false,
+            metrics: null as any
         };
     },
     created() {
@@ -87,7 +88,7 @@ export default Vue.extend({
         });
         
         api.getMetrics().then(r => {
-            console.log("metric %o", r.data);
+            this.metrics = r.data;
         });
     },
     mounted() {
@@ -112,9 +113,11 @@ export default Vue.extend({
         },
         handleNodeClicked(node: any) {   // it's actually a GVNode
             this.$store.commit(mc.SET_ROOT, node.data.content);
-            api.getTree(this.currentRoot, this.depthLimit).then(r => {
-                this.graphData = r.data;
-            });
+
+
+            // api.getTree(this.currentRoot, this.depthLimit).then(r => {
+            //     this.graphData = r.data;
+            // });
         },
     },
     watch: {
