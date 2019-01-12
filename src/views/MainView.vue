@@ -3,14 +3,14 @@
     <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
 
   <el-main>
-    <svg id="svg-frame" :width="width" :height="height">
+    <svg id="svg-frame" :width="width * 2" :height="height">
       <graph-view v-if="isDataLoaded"
                   v-on:node-clicked="handleNodeClicked"
                   :graph-data="graphData"
                   :width="width"
                   :height="height"
                   :x-margin="162"
-                  :y-margin="128"
+                  :y-margin="0"
                   :depth-offset="120"
                   :text-offset="22"
                   :text-content-template="textContentTemplate"
@@ -92,6 +92,13 @@ export default Vue.extend({
     },
     mounted() {
         this.widgetView.addCompoundWidget();
+        this.widgetView.addCompoundWidget();
+        this.widgetView.addCompoundWidget();
+        this.widgetView.addCompoundWidget();
+        this.widgetView.addCompoundWidget();
+        this.widgetView.addCompoundWidget();
+        this.widgetView.addCompoundWidget();
+        this.widgetView.addCompoundWidget();
     },
     methods: {
         respondToQueryNotDebounced() {
@@ -146,9 +153,11 @@ body {
     font-family: 'Oxygen', sans-serif;
 }
 
-/* The svg frame is 'pinned', taken outside of the flow layout, and occupies 
-   the entire page. */
 #svg-frame {
+    /* This is used for accepting drag/drop between widget and graph. */
+    /* The svg frame is 'pinned', taken outside of the flow layout, and occupies 
+       the entire page. */
+    /*
     position: absolute;
     top: 0px;
     right: 0px;
@@ -156,9 +165,17 @@ body {
     bottom: 0px;
     width: 100vw;
     height: 100vh;
+    */
 
     /* It's gotta have such a z-index, otherwise it will block HTML items from
        being interacted with. */
+    /*
     z-index: -1;
+    */
+}
+
+.main-view-container {
+    // stolen from tailwind shadow-md
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.12), 0 2px 4px 0 rgba(0,0,0,0.08);
 }
 </style>
