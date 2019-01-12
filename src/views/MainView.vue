@@ -1,13 +1,10 @@
 <template>
 <div class="page">
   <el-header>
-    
-
+    <p>Something that belongs in the header</p>
   </el-header>
   
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
-
-  <button v-on:click="getSerializedQuery">Get serialized query</button>
 
   <el-main>
     <svg id="svg-frame" :width="width" :height="height">
@@ -68,17 +65,15 @@ export default Vue.extend({
         };
     },
     created() {
-        
-        // Hacky stuff
-        // if (this.useRandomRoot) {
-        //     api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
-        //         this.graphData = r.data;
-        //     })
-        // } else {
-        //     api.getTree(this.currentRoot, this.depthLimit).then(r => {
-        //         this.graphData = r.data;
-        //     });
-        // }
+        if (this.useRandomRoot) {
+            api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
+                this.graphData = r.data;
+            })
+        } else {
+            api.getTree(this.currentRoot, this.depthLimit).then(r => {
+                this.graphData = r.data;
+            });
+        }
         
         // We obviously don't want to ALWAYS apply the filter.  So the best option
         // would be to be able to register on some sort of getter in the module.
@@ -99,6 +94,9 @@ export default Vue.extend({
             console.log("metric %o", r.data);
         });
     },
+    mounted() {
+        this.widgetView.addCompoundWidget();
+    },
     methods: {
         respondToQueryNotDebounced() {
             console.log("responding to query");
@@ -115,12 +113,6 @@ export default Vue.extend({
                 this.graphData = r.data;
             });
         },
-        getSerializedQuery() {
-            const view: any = this.$refs.widgetView;
-            if (!isWidgetViewComponent(view)) throw new Error("can't happen");
-            const widgetView: WidgetViewComponent = view;
-            console.log("Query was %o", JSON.stringify(widgetView.getQuery(), null, 4));
-        }
     },
     watch: {
         serializedQuery(newVal, oldVal) {
@@ -137,6 +129,12 @@ export default Vue.extend({
         },
         isDataLoaded(): boolean {
             return this.graphData !== null;
+        },
+        widgetView(): WidgetViewComponent {
+            const view: any = this.$refs.widgetView;
+            if (!isWidgetViewComponent(view)) throw new Error("can't happen");
+            const widgetView: WidgetViewComponent = view;
+            return widgetView;
         }
     }
 });

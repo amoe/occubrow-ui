@@ -10,6 +10,7 @@ export interface OccubrowUIState {
 
 export interface WidgetViewComponent {
     getQuery(): any;
+    addCompoundWidget(): void;
 };
 
 
