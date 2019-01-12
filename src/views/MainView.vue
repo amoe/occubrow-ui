@@ -1,10 +1,6 @@
 <template>
 <div class="page">
-  <el-header>
-    <p>Something that belongs in the header</p>
-  </el-header>
-  
-  <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
+    <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
 
   <el-main>
     <svg id="svg-frame" :width="width" :height="height">
