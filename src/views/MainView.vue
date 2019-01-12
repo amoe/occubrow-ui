@@ -19,7 +19,9 @@
   </el-main>
 
   <el-footer>
+    <div v-if="metrics">
     Order: {{metrics.order}}.  Size: {{metrics.size}}.  
+    </div>
     AGPL 2019
   </el-footer>
 </div>
@@ -58,7 +60,7 @@ export default Vue.extend({
             height: 600,
             depthLimit: 2,
             useRandomRoot: false,
-            metrics: null as any
+            metrics: null as any   // FIXME: type
         };
     },
     created() {
