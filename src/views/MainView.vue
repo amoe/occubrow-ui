@@ -65,7 +65,13 @@ import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 function processQuery(query: QuerySpec[] ): string[] {
-    return query.map(s => last(s.selectedPath));
+    console.log("serialized query in was %o", query);
+
+    const result1 = query.map(s => last(s.selectedPath));
+    const result2 = result1.filter(p => p !== undefined);
+
+    console.log("processed result is %o", result2);
+    return result2;
 }
 
 const QUERY_DEBOUNCE_TIMEOUT = 10000;
@@ -83,7 +89,7 @@ export default Vue.extend({
             width: 600,
             height: 600,
             depthLimit: 2,
-            useRandomRoot: true,
+            useRandomRoot: false,
             metrics: null as any,   // FIXME: type
             popoverVisible: false,
             popoverTitle: null as (string | null),
