@@ -35,6 +35,7 @@
   <el-footer>
 
   <el-select v-model="chosenRoot"
+             id="root-selector"
              filterable
              remote
              placeholder="Please enter a keyword"
@@ -48,8 +49,8 @@
   </el-select>
 
     <div v-if="metrics">
-      <span>Order: {{metrics.order}}.</span>
-      <span>Size: {{metrics.size}}.</span>
+      <span>Order: {{metrics.order}}.</span>&nbsp;
+      <span>Size: {{metrics.size}}.</span>&nbsp;
       <span>Depth limit: {{depthLimit}}.</span>
       <!-- can't list max depth yet due to some communication problems -->
     </div>
@@ -255,5 +256,9 @@ body {
 .context-token:hover {
     color: hsl(22.4,100%,50%);
     cursor: pointer;
+}
+
+#root-selector {
+    margin-bottom: 1em;
 }
 </style>
