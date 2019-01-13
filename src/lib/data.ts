@@ -10,15 +10,6 @@ const api = {
     getMetrics(): AxiosPromise {
         return axios.get("/api/metrics");
     },
-    getTree(root: string, depthLimit: number): AxiosPromise {
-        return axios.get(
-            "/api/tree", {
-                params: {
-                    'root': root,
-                    'depth_limit': depthLimit
-                }
-            });
-    },
     getTaxonomy(root: string): AxiosPromise {
         return axios.get("/api/taxonomy", { params: { root } });
     },
@@ -28,9 +19,17 @@ const api = {
     getContexts(token: string): AxiosPromise {
         return axios.get("/api/contexts", { params: { token } });
     },
-    submitTokenQuery(token: string, query: string[]): AxiosPromise {
+    submitTokenQuery(token: string, query: string[], depthLimit: number): AxiosPromise {
         console.log("i would submit query %o", query);
-        return axios.get("/api/query", { params: { root: token, filter: query } })
+        return axios.get(
+            "/api/query", {
+                params: {
+                    'root': token,
+                    'filter': query,
+                    'depth_limit': depthLimit
+                }
+            }
+        );
     }
 };
 
