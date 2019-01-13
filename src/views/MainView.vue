@@ -75,22 +75,27 @@ export default Vue.extend({
             width: 600,
             height: 600,
             depthLimit: 2,
-            useRandomRoot: false,
+            useRandomRoot: true,
             metrics: null as any,   // FIXME: type
             popoverVisible: false,
             popoverTitle: null as (string | null),
             displayedContexts: [] as Sentence[]
         };
     },
-    created() {
-        if (this.useRandomRoot) {
-            api.getRandomRoot().then(r => api.getTree(r.data, this.depthLimit)).then(r => {
-                this.graphData = r.data;
-            })
-        } else {
-            api.getTree(this.currentRoot, this.depthLimit).then(r => {
+    watch: {
+        serializedQuery(newVal, oldVal) {
+            console.log("inside serialized query watcher");
+            this.respondToQueryNotDebounced();
+        },
+        currentRoot(newVal: string, oldVal: string) {
+            api.getTree(newVal, this.depthLimit).then(r => {
                 this.graphData = r.data;
             });
+        }
+    },
+    created() {
+        if (this.useRandomRoot) {
+            api.getRandomRoot().then(r => this.recenter(r.data));
         }
         
         // We obviously don't want to ALWAYS apply the filter.  So the best option
@@ -145,12 +150,6 @@ export default Vue.extend({
                 this.displayedContexts = r.data;
             });
         },
-    },
-    watch: {
-        serializedQuery(newVal, oldVal) {
-            console.log("inside serialized query watcher");
-            this.respondToQueryNotDebounced();
-        }
     },
     computed: {
         serializedQuery(): QuerySpec[] {
