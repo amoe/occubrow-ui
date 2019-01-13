@@ -16,7 +16,7 @@
   </el-popover>
   
   <el-row>
-    <el-col :span="16">
+    <el-col :span="11">
       <svg id="svg-frame" :width="800" :height="800">
         <graph-view v-if="isDataLoaded"
                     v-on:node-clicked="handleNodeClicked"
@@ -32,27 +32,39 @@
                     ref="graphView"></graph-view>
       </svg>
     </el-col>
-    <el-col :span="8">
-      <div v-if="metrics">
-        <span>Order: {{metrics.order}}.</span>&nbsp;
-        <span>Size: {{metrics.size}}.</span>&nbsp;
-        <span>Depth limit: {{depthLimit}}.</span>
-        <!-- can't list max depth yet due to some communication problems -->
-      </div>
-      <el-select v-model="chosenRoot"
-                 id="root-selector"
-                 filterable
-                 remote
-                 placeholder="Please enter a keyword"
-                 :remote-method="remoteMethod"
-                 :loading="loading">
-        <el-option v-for="item in filteredTokenSelection"
-                   :key="item"
-                   :label="item"
-                   :value="item">
-        </el-option>
+    <el-col :span="12">
+      <div class="side-panel">
+        <div v-if="metrics">
+          <span>Order: {{metrics.order}}.</span>&nbsp;
+          <span>Size: {{metrics.size}}.</span>&nbsp;
+          <span>Depth limit: {{depthLimit}}.</span>
+          <!-- can't list max depth yet due to some communication problems -->
+        </div>
+        <el-select v-model="chosenRoot"
+                   id="root-selector"
+                   filterable
+                   remote
+                   placeholder="Please enter a keyword"
+                   :remote-method="remoteMethod"
+                   :loading="loading">
+          <el-option v-for="item in filteredTokenSelection"
+                     :key="item"
+                     :label="item"
+                     :value="item">
+          </el-option>
       </el-select>
 
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non tempor mi, vitae blandit erat. Curabitur felis mauris, aliquet vel congue sit amet, scelerisque ac turpis. Phasellus scelerisque ipsum sed lorem posuere, ultricies rutrum metus eleifend. Cras non enim non sem ornare facilisis condimentum vitae diam. Donec sit amet quam feugiat, interdum tortor id, fermentum lorem. Pellentesque quis ullamcorper diam, ut lacinia ipsum. Duis vel ultrices ligula.</p>
+
+<p>Proin tristique hendrerit lorem. Morbi aliquet sodales efficitur. Pellentesque imperdiet felis eros, at ultrices nunc dignissim at. Fusce non tristique augue, in interdum magna. Maecenas rhoncus ex eros, sed suscipit quam elementum eget. Maecenas vitae tincidunt eros, ac volutpat turpis. Curabitur imperdiet ut quam nec suscipit. Donec commodo ex convallis justo rhoncus, at vehicula ex dapibus. Fusce pellentesque arcu ac viverra interdum.</p>
+
+<p>Quisque urna turpis, sodales ac vulputate at, pharetra sed turpis. Mauris maximus efficitur cursus. Aenean ullamcorper nunc non ipsum fermentum gravida. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In hac habitasse platea dictumst. Quisque euismod lectus ac neque tincidunt, quis auctor augue feugiat. Sed ac leo egestas, suscipit sapien ut, blandit nibh. Duis malesuada tempus hendrerit. Phasellus pulvinar ullamcorper faucibus.</p>
+
+<p>Etiam ac rutrum mi, vitae efficitur nibh. Pellentesque faucibus ante lacus, et ornare sapien dictum quis. Phasellus euismod sodales convallis. Pellentesque vitae lectus a elit vestibulum dignissim. Suspendisse condimentum venenatis tristique. Maecenas egestas condimentum neque, nec tincidunt sapien consectetur quis. Sed gravida dui vitae ex sagittis, posuere mollis ante consectetur.</p>
+
+<p>Nulla gravida lorem quis mollis molestie. In id congue leo, vel fringilla leo. Ut urna mi, venenatis in dui vel, placerat tempus tellus. Aliquam ligula nisl, volutpat eget sem hendrerit, dictum tempus felis. Cras in hendrerit quam, vitae dictum nisi. Sed mollis dolor in enim efficitur venenatis. Nam eleifend dictum bibendum. Phasellus varius imperdiet euismod.         </p>
+
+      </div>
     </el-col>
   </el-row>
 </div>
@@ -259,5 +271,9 @@ body {
 
 #root-selector {
     margin-bottom: 1em;
+}
+
+.side-panel {
+    margin-top: 1.6em;
 }
 </style>
