@@ -31,7 +31,14 @@ const api = {
                 }
             }
         );
-    }
+    },
+    getAllTokens(): AxiosPromise {
+        return axios.get("/api/tokens", {});
+    },
+    searchTokens(substring: string): AxiosPromise {
+        return axios.get("/api/tokens", { params: { substring } });
+    },
+
 };
 
 export default api;

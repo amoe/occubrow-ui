@@ -33,6 +33,20 @@
   </el-main>
 
   <el-footer>
+
+  <el-select v-model="chosenRoot"
+             filterable
+             remote
+             placeholder="Please enter a keyword"
+             :remote-method="remoteMethod"
+             :loading="loading">
+    <el-option v-for="item in filteredTokenSelection"
+               :key="item"
+               :label="item"
+               :value="item">
+    </el-option>
+  </el-select>
+
     <div v-if="metrics">
       <span>Order: {{metrics.order}}.</span>
       <span>Size: {{metrics.size}}.</span>
@@ -78,7 +92,6 @@ const QUERY_DEBOUNCE_TIMEOUT = 10000;
 
 const foo = {"Occupation":{"children":[{"content":"Transport","id":4105,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Transport/1"},{"content":"Manage","id":4101,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Manage/1"},{"content":"Drive","id":4102,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Drive/1"},{"content":"Serve","id":4103,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Serve/1"}],"content":"Occupation","id":4104,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Occupation/1"},"Place":{"children":[{"content":"Pub","id":4107,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Pub/1"},{"children":[{"content":"Clothes shop","id":4106,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes shop/1"}],"content":"Shop","id":4109,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Shop/1"}],"content":"Place","id":4108,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Place/1"},"Object":{"children":[{"content":"Clothes","id":4112,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes/1"},{"content":"Alcoholic drink","id":4113,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Alcoholic drink/1"},{"content":"Vehicle","id":4110,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Vehicle/1"},{"content":"Bricks","id":4111,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Bricks/1"}],"content":"Object","id":4114,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Object/1"}};
 
-
 export default Vue.extend({
     components: {GraphView, WidgetView},
     data() {
@@ -88,12 +101,15 @@ export default Vue.extend({
             taxonomies: {} as any,
             width: 600,
             height: 600,
-            depthLimit: 2,
+            depthLimit: 4,
             useRandomRoot: false,
             metrics: null as any,   // FIXME: type
             popoverVisible: false,
             popoverTitle: null as (string | null),
             displayedContexts: [] as Sentence[],
+            chosenRoot: null as (string | null),
+            filteredTokenSelection: [] as string[],
+            loading: false
         };
     },
     watch: {
@@ -103,6 +119,9 @@ export default Vue.extend({
         },
         currentRoot(newVal: string, oldVal: string) {
             this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);
+        },
+        chosenRoot(newVal: string, oldVal: string) {
+            this.recenter(newVal);
         }
     },
     created() {
@@ -128,6 +147,10 @@ export default Vue.extend({
         api.getMetrics().then(r => {
             this.metrics = r.data;
         });
+
+        api.getAllTokens().then(r => {
+            this.filteredTokenSelection = r.data;
+        });
     },
     mounted() {
         this.widgetView.addCompoundWidget();
@@ -142,6 +165,14 @@ export default Vue.extend({
     methods: {
         recenter(token: string) {
             this.$store.commit(mc.SET_ROOT, token);
+        },
+        remoteMethod(substring: string) {
+            this.loading = true;
+            api.searchTokens(substring).then(r => {
+                this.filteredTokenSelection = r.data;
+                this.loading = false;
+            });
+
         },
         respondToQueryNotDebounced(currentRoot: string, query: QuerySpec[], depthLimit: number) {
             log.debug("responding to query");
