@@ -1,5 +1,6 @@
 import { TreeNode, QuerySpec } from '@/types';
 import axios, { AxiosPromise } from 'axios';
+import * as log from 'loglevel';
 
 // data is a terrible name for this
 

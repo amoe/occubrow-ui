@@ -52,6 +52,7 @@ import {TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec, Sentence} f
 import {isWidgetViewComponent} from '@/type-guards';
 import {last} from '@/util';
 import {debounce} from 'lodash';
+import * as log from 'loglevel';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
