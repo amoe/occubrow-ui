@@ -3,8 +3,6 @@
     <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
 
   <el-main>
-    
-
     <el-popover placement="bottom"
                 :title="popoverTitle"
                 width="200"
@@ -17,7 +15,6 @@
         </span>
       </div>
     </el-popover>
-
 
     <svg id="svg-frame" :width="width * 2" :height="height">
       <graph-view v-if="isDataLoaded"
@@ -117,13 +114,13 @@ export default Vue.extend({
     },
     mounted() {
         this.widgetView.addCompoundWidget();
-        this.widgetView.addCompoundWidget();
-        this.widgetView.addCompoundWidget();
-        this.widgetView.addCompoundWidget();
-        this.widgetView.addCompoundWidget();
-        this.widgetView.addCompoundWidget();
-        this.widgetView.addCompoundWidget();
-        this.widgetView.addCompoundWidget();
+        // this.widgetView.addCompoundWidget();
+        // this.widgetView.addCompoundWidget();
+        // this.widgetView.addCompoundWidget();
+        // this.widgetView.addCompoundWidget();
+        // this.widgetView.addCompoundWidget();
+        // this.widgetView.addCompoundWidget();
+        // this.widgetView.addCompoundWidget();
     },
     methods: {
         recenter(token: string) {
