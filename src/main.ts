@@ -3,6 +3,8 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 import { GraphView, GraphViewModule } from 'occubrow-graph-view';
+import * as log from 'loglevel';
+
 
 // Set up Element
 import ElementUI from 'element-ui';
@@ -15,9 +17,10 @@ Vue.use(ElementUI, { locale })
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
-
-
 require('typeface-oxygen');
+
+log.setLevel(log.levels.DEBUG);
+
 
 Vue.config.productionTip = false;
 

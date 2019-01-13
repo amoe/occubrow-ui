@@ -9,7 +9,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "amoe-butterworth-widgets": "^0.5.9",
+    "amoe-butterworth-widgets": "^0.5.11",
     "element-ui": "^2.4.11",
     "lodash": "^4.17.11",
     "occubrow-graph-view": "^0.5.2",

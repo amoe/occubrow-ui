@@ -20,7 +20,7 @@ const api = {
         return axios.get("/api/contexts", { params: { token } });
     },
     submitTokenQuery(token: string, query: string[], depthLimit: number): AxiosPromise {
-        console.log("i would submit query %o", query);
+        log.debug("i would submit query %o", query);
         return axios.get(
             "/api/query", {
                 params: {

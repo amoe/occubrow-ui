@@ -81,7 +81,7 @@ export default Vue.extend({
     },
     watch: {
         serializedQuery(newVal, oldVal) {
-            console.log("inside serialized query watcher");
+            log.debug("inside serialized query watcher");
             this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);
         },
         currentRoot(newVal: string, oldVal: string) {
@@ -127,7 +127,7 @@ export default Vue.extend({
             this.$store.commit(mc.SET_ROOT, token);
         },
         respondToQueryNotDebounced(currentRoot: string, query: QuerySpec[], depthLimit: number) {
-            console.log("responding to query");
+            log.debug("responding to query");
 
             api.submitTokenQuery(
                 this.currentRoot, 
