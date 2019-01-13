@@ -9,8 +9,14 @@
                 :title="popoverTitle"
                 width="200"
                 trigger="manual"
-                content="this is content, this is content, this is content"
-                v-model="popoverVisible"/>
+                v-model="popoverVisible">
+      <div v-for="sentence in displayedContexts">
+        <span v-for="token in sentence.content">
+          <span v-on:click="recenter(token)"
+                class="context-token">{{token}}</span>&nbsp;
+        </span>
+      </div>
+    </el-popover>
 
 
     <svg id="svg-frame" :width="width * 2" :height="height">
@@ -45,7 +51,7 @@ import TreeModel from 'tree-model';
 import {mapGetters} from 'vuex';
 import mc from '@/mutation-constants';
 import api from '@/lib/data';
-import {TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec} from '@/types';
+import {TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec, Sentence} from '@/types';
 import {isWidgetViewComponent} from '@/type-guards';
 import {last} from '@/util';
 import {debounce} from 'lodash';
@@ -72,7 +78,8 @@ export default Vue.extend({
             useRandomRoot: false,
             metrics: null as any,   // FIXME: type
             popoverVisible: false,
-            popoverTitle: null as (string | null)
+            popoverTitle: null as (string | null),
+            displayedContexts: [] as Sentence[]
         };
     },
     created() {
@@ -116,6 +123,9 @@ export default Vue.extend({
         this.widgetView.addCompoundWidget();
     },
     methods: {
+        recenter(token: string) {
+            this.$store.commit(mc.SET_ROOT, token);
+        },
         respondToQueryNotDebounced() {
             console.log("responding to query");
 
@@ -131,9 +141,9 @@ export default Vue.extend({
             this.popoverVisible = !this.popoverVisible;
             this.popoverTitle = node.data.content;
 
-            // api.getTree(this.currentRoot, this.depthLimit).then(r => {
-            //     this.graphData = r.data;
-            // });
+            api.getContexts(node.data.content).then(r => {
+                this.displayedContexts = r.data;
+            });
         },
     },
     watch: {
@@ -196,5 +206,10 @@ body {
 .main-view-container {
     // stolen from tailwind shadow-md
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.12), 0 2px 4px 0 rgba(0,0,0,0.08);
+}
+
+.context-token:hover {
+    color: hsl(22.4,100%,50%);
+    cursor: pointer;
 }
 </style>

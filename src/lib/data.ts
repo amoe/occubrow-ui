@@ -1,6 +1,8 @@
 import { TreeNode, QuerySpec } from '@/types';
 import axios, { AxiosPromise } from 'axios';
 
+// data is a terrible name for this
+
 const api = {
     getRandomRoot(): AxiosPromise {
         return axios.get("/api/random-root");
@@ -22,6 +24,9 @@ const api = {
     },
     getTaxonomyRoots(): AxiosPromise {
         return axios.get("/api/taxonomy-roots");
+    },
+    getContexts(token: string): AxiosPromise {
+        return axios.get("/api/contexts", { params: { token } });
     },
     submitTokenQuery(token: string, query: string[]): AxiosPromise {
         console.log("i would submit query %o", query);

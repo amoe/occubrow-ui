@@ -23,3 +23,8 @@ export interface QuerySpec {
     taxonomyRef: string;
     selectedPath: string[];
 }
+
+export interface Sentence {
+    uuid: string;
+    content: string[];
+}
