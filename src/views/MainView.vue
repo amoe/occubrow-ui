@@ -34,7 +34,10 @@
 
   <el-footer>
     <div v-if="metrics">
-    Order: {{metrics.order}}.  Size: {{metrics.size}}.
+      <span>Order: {{metrics.order}}.</span>
+      <span>Size: {{metrics.size}}.</span>
+      <span>Depth limit: {{depthLimit}}.</span>
+      <!-- can't list max depth yet due to some communication problems -->
     </div>
     AGPL 2019
   </el-footer>
@@ -84,7 +87,7 @@ export default Vue.extend({
             metrics: null as any,   // FIXME: type
             popoverVisible: false,
             popoverTitle: null as (string | null),
-            displayedContexts: [] as Sentence[]
+            displayedContexts: [] as Sentence[],
         };
     },
     watch: {
@@ -94,7 +97,7 @@ export default Vue.extend({
         },
         currentRoot(newVal: string, oldVal: string) {
             this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);
-        },
+        }
     },
     created() {
         if (this.useRandomRoot) {
@@ -171,12 +174,6 @@ export default Vue.extend({
             if (!isWidgetViewComponent(view)) throw new Error("can't happen");
             const widgetView: WidgetViewComponent = view;
             return widgetView;
-        },
-        graphView(): GraphViewComponent {
-            const view: any = this.$refs.graphView;
-            if (!isGraphViewComponent(view)) throw new Error("can't happen");
-            const graphView: GraphViewComponent = view;
-            return graphView;
         }
     }
 });
