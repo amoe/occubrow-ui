@@ -28,3 +28,8 @@ export interface Sentence {
     uuid: string;
     content: string[];
 }
+
+export interface GraphViewComponent {
+    name: string;
+    maxDepth: number;
+}

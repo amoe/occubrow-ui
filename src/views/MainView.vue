@@ -27,13 +27,14 @@
                   :depth-offset="120"
                   :text-offset="22"
                   :text-content-template="textContentTemplate"
-                  :breadth="360"></graph-view>
+                  :breadth="360"
+                  ref="graphView"></graph-view>
     </svg>
   </el-main>
 
   <el-footer>
     <div v-if="metrics">
-    Order: {{metrics.order}}.  Size: {{metrics.size}}.  
+    Order: {{metrics.order}}.  Size: {{metrics.size}}.
     </div>
     AGPL 2019
   </el-footer>
@@ -48,8 +49,11 @@ import TreeModel from 'tree-model';
 import {mapGetters} from 'vuex';
 import mc from '@/mutation-constants';
 import api from '@/lib/data';
-import {TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec, Sentence} from '@/types';
-import {isWidgetViewComponent} from '@/type-guards';
+import {
+    TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec, Sentence,
+    GraphViewComponent
+} from '@/types';
+import {isWidgetViewComponent, isGraphViewComponent} from '@/type-guards';
 import {last} from '@/util';
 import {debounce} from 'lodash';
 import * as log from 'loglevel';
@@ -167,6 +171,12 @@ export default Vue.extend({
             if (!isWidgetViewComponent(view)) throw new Error("can't happen");
             const widgetView: WidgetViewComponent = view;
             return widgetView;
+        },
+        graphView(): GraphViewComponent {
+            const view: any = this.$refs.graphView;
+            if (!isGraphViewComponent(view)) throw new Error("can't happen");
+            const graphView: GraphViewComponent = view;
+            return graphView;
         }
     }
 });
