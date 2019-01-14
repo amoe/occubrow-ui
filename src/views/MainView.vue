@@ -44,7 +44,7 @@
                    id="root-selector"
                    filterable
                    remote
-                   placeholder="Please enter a keyword"
+                   placeholder="Search tokens..."
                    :remote-method="remoteMethod"
                    :loading="loading">
           <el-option v-for="item in filteredTokenSelection"
@@ -52,18 +52,22 @@
                      :label="item"
                      :value="item">
           </el-option>
-      </el-select>
+        </el-select>
+        
+        <el-table :data="roundedCentralityData"
+                  v-on:cell-click="handleCentralityClick"> 
+          <el-table-column prop="node" class-name="clickable-table-datum"
+                           label="Token"></el-table-column>
+          <el-table-column prop="centrality" label="Centrality"></el-table-column>
+        </el-table>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non tempor mi, vitae blandit erat. Curabitur felis mauris, aliquet vel congue sit amet, scelerisque ac turpis. Phasellus scelerisque ipsum sed lorem posuere, ultricies rutrum metus eleifend. Cras non enim non sem ornare facilisis condimentum vitae diam. Donec sit amet quam feugiat, interdum tortor id, fermentum lorem. Pellentesque quis ullamcorper diam, ut lacinia ipsum. Duis vel ultrices ligula.</p>
-
-<p>Proin tristique hendrerit lorem. Morbi aliquet sodales efficitur. Pellentesque imperdiet felis eros, at ultrices nunc dignissim at. Fusce non tristique augue, in interdum magna. Maecenas rhoncus ex eros, sed suscipit quam elementum eget. Maecenas vitae tincidunt eros, ac volutpat turpis. Curabitur imperdiet ut quam nec suscipit. Donec commodo ex convallis justo rhoncus, at vehicula ex dapibus. Fusce pellentesque arcu ac viverra interdum.</p>
-
-<p>Quisque urna turpis, sodales ac vulputate at, pharetra sed turpis. Mauris maximus efficitur cursus. Aenean ullamcorper nunc non ipsum fermentum gravida. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In hac habitasse platea dictumst. Quisque euismod lectus ac neque tincidunt, quis auctor augue feugiat. Sed ac leo egestas, suscipit sapien ut, blandit nibh. Duis malesuada tempus hendrerit. Phasellus pulvinar ullamcorper faucibus.</p>
-
-<p>Etiam ac rutrum mi, vitae efficitur nibh. Pellentesque faucibus ante lacus, et ornare sapien dictum quis. Phasellus euismod sodales convallis. Pellentesque vitae lectus a elit vestibulum dignissim. Suspendisse condimentum venenatis tristique. Maecenas egestas condimentum neque, nec tincidunt sapien consectetur quis. Sed gravida dui vitae ex sagittis, posuere mollis ante consectetur.</p>
-
-<p>Nulla gravida lorem quis mollis molestie. In id congue leo, vel fringilla leo. Ut urna mi, venenatis in dui vel, placerat tempus tellus. Aliquam ligula nisl, volutpat eget sem hendrerit, dictum tempus felis. Cras in hendrerit quam, vitae dictum nisi. Sed mollis dolor in enim efficitur venenatis. Nam eleifend dictum bibendum. Phasellus varius imperdiet euismod.         </p>
-
+        
+        <div class="history-list">
+          <span v-for="datum in rootHistoryTable">
+            <chevrons-right/>
+            <span class="clickable-history-datum" v-on:click="recenter(datum.token)">{{datum.token}}</span>
+          </span> 
+        </div>
       </div>
     </el-col>
   </el-row>
@@ -80,12 +84,13 @@ import mc from '@/mutation-constants';
 import api from '@/lib/data';
 import {
     TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec, Sentence,
-    GraphViewComponent
+    GraphViewComponent, CentralityDatum, HistoryDatum
 } from '@/types';
 import {isWidgetViewComponent, isGraphViewComponent} from '@/type-guards';
 import {last} from '@/util';
 import {debounce} from 'lodash';
 import * as log from 'loglevel';
+ import ChevronsRight from '@/components/ChevronsRight.vue';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
@@ -105,7 +110,7 @@ const QUERY_DEBOUNCE_TIMEOUT = 10000;
 const foo = {"Occupation":{"children":[{"content":"Transport","id":4105,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Transport/1"},{"content":"Manage","id":4101,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Manage/1"},{"content":"Drive","id":4102,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Drive/1"},{"content":"Serve","id":4103,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Serve/1"}],"content":"Occupation","id":4104,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Occupation/1"},"Place":{"children":[{"content":"Pub","id":4107,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Pub/1"},{"children":[{"content":"Clothes shop","id":4106,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes shop/1"}],"content":"Shop","id":4109,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Shop/1"}],"content":"Place","id":4108,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Place/1"},"Object":{"children":[{"content":"Clothes","id":4112,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes/1"},{"content":"Alcoholic drink","id":4113,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Alcoholic drink/1"},{"content":"Vehicle","id":4110,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Vehicle/1"},{"content":"Bricks","id":4111,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Bricks/1"}],"content":"Object","id":4114,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Object/1"}};
 
 export default Vue.extend({
-    components: {GraphView, WidgetView},
+    components: {GraphView, WidgetView, ChevronsRight},
     data() {
         return {
             textContentTemplate: "{{content}}",
@@ -121,7 +126,8 @@ export default Vue.extend({
             displayedContexts: [] as Sentence[],
             chosenRoot: null as (string | null),
             filteredTokenSelection: [] as string[],
-            loading: false
+            loading: false,
+            centralityData: [] as CentralityDatum[]
         };
     },
     watch: {
@@ -163,6 +169,10 @@ export default Vue.extend({
         api.getAllTokens().then(r => {
             this.filteredTokenSelection = r.data;
         });
+
+        api.getCentralityStatistics().then(r => {
+            this.centralityData = r.data;
+        });
     },
     mounted() {
         this.widgetView.addCompoundWidget();
@@ -175,6 +185,16 @@ export default Vue.extend({
         // this.widgetView.addCompoundWidget();
     },
     methods: {
+        handleCentralityClick(row: any, column: any, cell: any, event: MouseEvent) {
+            if (column.property === 'node') {
+                this.recenter(cell.textContent);
+            }
+        },
+        handleHistoryClick(row: any, column: any, cell: any, event: MouseEvent) {
+            if (column.property === 'node') {
+                this.recenter(cell.textContent);
+            }
+        },
         recenter(token: string) {
             this.$store.commit(mc.SET_ROOT, token);
         },
@@ -209,6 +229,9 @@ export default Vue.extend({
         },
     },
     computed: {
+        rootHistoryTable(): HistoryDatum[] {
+            return this.$store.getters.rootHistoryTable;
+        },
         serializedQuery(): QuerySpec[] {
             return this.$store.getters.serializedQuery;
         },
@@ -223,6 +246,11 @@ export default Vue.extend({
             if (!isWidgetViewComponent(view)) throw new Error("can't happen");
             const widgetView: WidgetViewComponent = view;
             return widgetView;
+        },
+        roundedCentralityData(): CentralityDatum[] {
+            return this.centralityData.map(d => {
+                return Object.assign({}, d, {centrality: Number(d.centrality).toFixed(2)})
+            });
         }
     }
 });
@@ -269,11 +297,25 @@ body {
     cursor: pointer;
 }
 
+.clickable-table-datum:hover {
+    color: hsl(22.4,100%,50%);
+    cursor: pointer;
+}
+
 #root-selector {
     margin-bottom: 1em;
 }
 
 .side-panel {
     margin-top: 1.6em;
+}
+
+.history-list {
+    margin-top: 1.6em;
+}
+
+.clickable-history-datum:hover {
+    color: hsl(22.4,100%,50%);
+    cursor: pointer;
 }
 </style>

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { OccubrowUIState } from '@/types';
+import { OccubrowUIState, HistoryDatum } from '@/types';
 import { GraphViewModule } from 'occubrow-graph-view';
 import { WidgetsModule } from 'amoe-butterworth-widgets';
 import mc from '@/mutation-constants';
@@ -22,9 +22,12 @@ export default new Vuex.Store({
             const lastIndex = state.rootHistory.length - 1;
             return state.rootHistory[lastIndex]
         },
+        rootHistoryTable(state, getters): HistoryDatum[] {
+            return state.rootHistory.map(s => ({ token: s }));
+        }
     },
     modules: {
         graphView: GraphViewModule,
         widgets: WidgetsModule
-    }
+    },
 });

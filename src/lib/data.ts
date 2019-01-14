@@ -38,7 +38,9 @@ const api = {
     searchTokens(substring: string): AxiosPromise {
         return axios.get("/api/tokens", { params: { substring } });
     },
-
+    getCentralityStatistics(): AxiosPromise {
+        return axios.get("/api/centrality", {});
+    }
 };
 
 export default api;

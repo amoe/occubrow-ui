@@ -33,3 +33,12 @@ export interface GraphViewComponent {
     name: string;
     maxDepth: number;
 }
+
+export interface CentralityDatum {
+    node: string;
+    centrality: number;
+}
+
+export interface HistoryDatum {
+    token: string;
+}
