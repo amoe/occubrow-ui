@@ -34,25 +34,38 @@
     </el-col>
     <el-col :span="12">
       <div class="side-panel">
-        <div v-if="metrics">
-          <span>Order: {{metrics.order}}.</span>&nbsp;
-          <span>Size: {{metrics.size}}.</span>&nbsp;
-          <span>Depth limit: {{depthLimit}}.</span>
-          <!-- can't list max depth yet due to some communication problems -->
-        </div>
-        <el-select v-model="chosenRoot"
-                   id="root-selector"
-                   filterable
-                   remote
-                   placeholder="Search tokens..."
-                   :remote-method="remoteMethod"
-                   :loading="loading">
-          <el-option v-for="item in filteredTokenSelection"
-                     :key="item"
-                     :label="item"
-                     :value="item">
-          </el-option>
+        <div>
+          <span class="label">Root token</span>
+          <el-select v-model="chosenRoot"
+                     id="root-selector"
+                     filterable
+                     remote
+                     placeholder="Search tokens..."
+                     :remote-method="remoteMethod"
+                     :loading="loading">
+            <el-option v-for="item in filteredTokenSelection"
+                       :key="item"
+                       :label="item"
+                       :value="item">
+            </el-option>
         </el-select>
+          </div>
+
+        <div class="depth-limit">
+          <span class="label">Depth limit</span>
+          
+        <el-input-number v-model="depthLimit"
+                         v-on:change="depthChanged"
+                         label="Depth limit"
+                         class="what"
+                         :min="1"
+                         :max="10"></el-input-number>
+        </div>
+
+        <div v-if="metrics" class="metrics">
+          <span>Graph order: {{metrics.order}}.</span>&nbsp;
+          <span>Size: {{metrics.size}}.</span>&nbsp;
+        </div>
         
         <el-table :data="roundedCentralityData"
                   v-on:cell-click="handleCentralityClick"> 
@@ -185,6 +198,9 @@ export default Vue.extend({
         // this.widgetView.addCompoundWidget();
     },
     methods: {
+        depthChanged() {
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);            
+        },
         handleCentralityClick(row: any, column: any, cell: any, event: MouseEvent) {
             if (column.property === 'node') {
                 this.recenter(cell.textContent);
@@ -317,5 +333,20 @@ body {
 .clickable-history-datum:hover {
     color: hsl(22.4,100%,50%);
     cursor: pointer;
+}
+
+.metrics {
+    margin-bottom: 1.6em;
+}
+
+.depth-limit {
+    margin-bottom: 1.6em;
+}
+
+
+// not very principled
+.label {
+    display: inline-block;
+    width: 130px;
 }
 </style>
