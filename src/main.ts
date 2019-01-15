@@ -19,7 +19,7 @@ import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 require('typeface-oxygen');
 
-log.setLevel(log.levels.DEBUG);
+log.setLevel(log.levels.INFO);
 
 
 Vue.config.productionTip = false;
