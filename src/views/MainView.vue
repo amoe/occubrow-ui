@@ -2,46 +2,8 @@
 <div class="page">
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
   
-  
   <el-row>
-    <el-col :span="4">
-      <div class="sidebar">
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non tempor mi, vitae blandit erat. Curabitur felis mauris, aliquet vel congue sit amet, scelerisque ac turpis. Phasellus scelerisque ipsum sed lorem posuere, ultricies rutrum metus eleifend. Cras non enim non sem ornare facilisis condimentum vitae diam. Donec sit amet quam feugiat, interdum tortor id, fermentum lorem. Pellentesque quis ullamcorper diam, ut lacinia ipsum. Duis vel ultrices ligula.</p>
-        <p>Proin tristique hendrerit lorem. Morbi aliquet sodales efficitur. Pellentesque imperdiet felis eros, at ultrices nunc dignissim at. Fusce non tristique augue, in interdum magna. Maecenas rhoncus ex eros, sed suscipit quam elementum eget. Maecenas vitae tincidunt eros, ac volutpat turpis. Curabitur imperdiet ut quam nec suscipit. Donec commodo ex convallis justo rhoncus, at vehicula ex dapibus. Fusce pellentesque arcu ac viverra interdum.</p>
-        <p>Quisque urna turpis, sodales ac vulputate at, pharetra sed turpis. Mauris maximus efficitur cursus. Aenean ullamcorper nunc non ipsum fermentum gravida. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In hac habitasse platea dictumst. Quisque euismod lectus ac neque tincidunt, quis auctor augue feugiat. Sed ac leo egestas, suscipit sapien ut, blandit nibh. Duis malesuada tempus hendrerit. Phasellus pulvinar ullamcorper faucibus.</p>
-      </div>
-    </el-col>
-    
-    <el-col :span="11" :push="2">
-      <el-popover placement="bottom"
-                  :title="popoverTitle"
-                  width="200"
-                  trigger="manual"
-                  v-model="popoverVisible">
-        <div v-for="sentence in displayedContexts" class="context-popover">
-          <span v-for="token in sentence.content">
-            <span v-on:click="recenter(token)"
-                  class="context-token">{{token}}</span>&nbsp;
-      </span>
-    </div>
-  </el-popover>
-
-      <svg id="svg-frame" :width="800" :height="800">
-        <graph-view v-if="isDataLoaded"
-                    v-on:node-clicked="handleNodeClicked"
-                    :graph-data="graphData"
-                    :width="800"
-                    :height="800"
-                    :x-margin="0"
-                    :y-margin="0"
-                    :depth-offset="120"
-                    :text-offset="22"
-                    :text-content-template="textContentTemplate"
-                    :breadth="360"
-                    ref="graphView"></graph-view>
-      </svg>
-    </el-col>
-    <el-col :span="5" :push="3">
+    <el-col :span="5">
       <div class="side-panel">
         <div>
           <span class="label">Root token</span>
@@ -90,6 +52,43 @@
             <span class="clickable-history-datum" v-on:click="recenter(datum.token)">{{datum.token}}</span>
           </span> 
         </div>
+      </div>
+    </el-col>
+    
+    <el-col :span="11" :push="2">
+      <el-popover placement="bottom"
+                  :title="popoverTitle"
+                  width="200"
+                  trigger="manual"
+                  v-model="popoverVisible">
+        <div v-for="sentence in displayedContexts" class="context-popover">
+          <span v-for="token in sentence.content">
+            <span v-on:click="recenter(token)"
+                  class="context-token">{{token}}</span>&nbsp;
+      </span>
+    </div>
+  </el-popover>
+
+      <svg id="svg-frame" :width="800" :height="800">
+        <graph-view v-if="isDataLoaded"
+                    v-on:node-clicked="handleNodeClicked"
+                    :graph-data="graphData"
+                    :width="800"
+                    :height="800"
+                    :x-margin="0"
+                    :y-margin="0"
+                    :depth-offset="120"
+                    :text-offset="22"
+                    :text-content-template="textContentTemplate"
+                    :breadth="360"
+                    ref="graphView"></graph-view>
+      </svg>
+    </el-col>
+    <el-col :span="5" :push="3">
+      <div class="sidebar">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non tempor mi, vitae blandit erat. Curabitur felis mauris, aliquet vel congue sit amet, scelerisque ac turpis. Phasellus scelerisque ipsum sed lorem posuere, ultricies rutrum metus eleifend. Cras non enim non sem ornare facilisis condimentum vitae diam. Donec sit amet quam feugiat, interdum tortor id, fermentum lorem. Pellentesque quis ullamcorper diam, ut lacinia ipsum. Duis vel ultrices ligula.</p>
+        <p>Proin tristique hendrerit lorem. Morbi aliquet sodales efficitur. Pellentesque imperdiet felis eros, at ultrices nunc dignissim at. Fusce non tristique augue, in interdum magna. Maecenas rhoncus ex eros, sed suscipit quam elementum eget. Maecenas vitae tincidunt eros, ac volutpat turpis. Curabitur imperdiet ut quam nec suscipit. Donec commodo ex convallis justo rhoncus, at vehicula ex dapibus. Fusce pellentesque arcu ac viverra interdum.</p>
+        <p>Quisque urna turpis, sodales ac vulputate at, pharetra sed turpis. Mauris maximus efficitur cursus. Aenean ullamcorper nunc non ipsum fermentum gravida. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In hac habitasse platea dictumst. Quisque euismod lectus ac neque tincidunt, quis auctor augue feugiat. Sed ac leo egestas, suscipit sapien ut, blandit nibh. Duis malesuada tempus hendrerit. Phasellus pulvinar ullamcorper faucibus.</p>
       </div>
     </el-col>
   </el-row>
