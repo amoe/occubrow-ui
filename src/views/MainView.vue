@@ -130,8 +130,6 @@ function processQuery(query: QuerySpec[] ): string[] {
 
 const QUERY_DEBOUNCE_TIMEOUT = 10000;
 
-const foo = {"Occupation":{"children":[{"content":"Transport","id":4105,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Transport/1"},{"content":"Manage","id":4101,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Manage/1"},{"content":"Drive","id":4102,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Drive/1"},{"content":"Serve","id":4103,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Serve/1"}],"content":"Occupation","id":4104,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Occupation/1"},"Place":{"children":[{"content":"Pub","id":4107,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Pub/1"},{"children":[{"content":"Clothes shop","id":4106,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes shop/1"}],"content":"Shop","id":4109,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Shop/1"}],"content":"Place","id":4108,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Place/1"},"Object":{"children":[{"content":"Clothes","id":4112,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes/1"},{"content":"Alcoholic drink","id":4113,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Alcoholic drink/1"},{"content":"Vehicle","id":4110,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Vehicle/1"},{"content":"Bricks","id":4111,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Bricks/1"}],"content":"Object","id":4114,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Object/1"}};
-
 export default Vue.extend({
     components: {GraphView, WidgetView, ChevronsRight},
     data() {
