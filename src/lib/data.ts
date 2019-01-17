@@ -2,9 +2,6 @@ import { TreeNode, QuerySpec } from '@/types';
 import axios, { AxiosPromise, AxiosError, AxiosResponse } from 'axios';
 import * as log from 'loglevel';
 
-// data is a terrible name for this
-
-
 export class DataGateway {
     loadingStarted: Function;
     loadingEnded: Function;
@@ -20,7 +17,7 @@ export class DataGateway {
 
     makeApiCall(endpoint: string, params: any): AxiosPromise {
         this.loadingStarted();
-        return axios.get("/api" + endpoint, params).then((r: any) => {
+        return axios.get("/api" + endpoint, { params }).then((r: any) => {
             this.loadingEnded();
             return r;
         }).catch((r: AxiosError) => {
@@ -30,45 +27,43 @@ export class DataGateway {
     }
 
     getRandomRoot(): AxiosPromise {
-        return axios.get("/api/random-root").catch(r => this.errorReporter(r));
+        return this.makeApiCall("/random-root", {});
     }
 
     getMetrics(): AxiosPromise {
-        return axios.get("/api/metrics").catch(r => this.errorReporter(r));
+        return this.makeApiCall("/metrics", {});
     }
 
     getTaxonomy(root: string): AxiosPromise {
-        return axios.get("/api/taxonomy", { params: { root } }).catch(r => this.errorReporter(r));
+        return this.makeApiCall("/taxonomy", { root });
     }
 
     getTaxonomyRoots(): AxiosPromise {
-        return axios.get("/api/taxonomy-roots").catch(r => this.errorReporter(r));
+        return this.makeApiCall("/taxonomy-roots", {});
     }
 
     getContexts(token: string): AxiosPromise {
-        return axios.get("/api/contexts", { params: { token } }).catch(r => this.errorReporter(r));
+        return this.makeApiCall("/contexts", { token });
     }
 
     submitTokenQuery(token: string, query: string[], depthLimit: number): AxiosPromise {
         return this.makeApiCall(
             "/query", {
-                params: {
-                    'root': token, 'filter': query, 'depth_limit': depthLimit
-                }
+                'root': token, 'filter': query, 'depth_limit': depthLimit
             }
         );
 
     }
 
     getAllTokens(): AxiosPromise {
-        return axios.get("/api/tokens", {}).catch(r => this.errorReporter(r));
+        return this.makeApiCall("/tokens", {});
     }
 
     searchTokens(substring: string): AxiosPromise {
-        return axios.get("/api/tokens", { params: { substring } }).catch(r => this.errorReporter(r));
+        return this.makeApiCall("/tokens", { substring });
     }
 
     getCentralityStatistics(): AxiosPromise {
-        return axios.get("/api/centrality", {}).catch(r => this.errorReporter(r));
+        return this.makeApiCall("/centrality", {});
     }
 }

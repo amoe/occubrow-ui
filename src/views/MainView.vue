@@ -171,6 +171,7 @@ export default Vue.extend({
         }
     },
     created() {
+        // have to initialize it here because of some quirks of typescript
         this.dataGateway = new DataGateway(
             this.onLoadingStarted,
             this.onLoadingEnded,
