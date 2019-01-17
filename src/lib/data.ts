@@ -46,10 +46,14 @@ export class DataGateway {
         return this.makeApiCall("/contexts", { token });
     }
 
-    submitTokenQuery(token: string, query: string[], depthLimit: number): AxiosPromise {
+    submitTokenQuery(
+        token: string, query: string[], depthLimit: number,
+        cooccurrenceThreshold: number
+    ): AxiosPromise {
         return this.makeApiCall(
             "/query", {
-                'root': token, 'filter': query, 'depth_limit': depthLimit
+                'root': token, 'filter': query, 'depth_limit': depthLimit,
+                'cooccurrence_threshold': cooccurrenceThreshold
             }
         );
 

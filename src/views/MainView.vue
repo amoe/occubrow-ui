@@ -30,9 +30,18 @@
           <el-input-number v-model="depthLimit"
                            v-on:change="depthChanged"
                            label="Depth limit"
-                           class="what"
                            :min="1"
                            :max="10"></el-input-number>
+        </div>
+
+        <div class="cooccurrence-threshold">
+          <span class="label">Threshold</span>
+          
+          <el-input-number v-model="cooccurrenceThreshold"
+                           v-on:change="thresholdChanged"
+                           label="Coocurrence threshold"
+                           :min="0"
+                           :max="100"></el-input-number>
         </div>
         
         <div v-if="metrics" class="metrics">
@@ -63,7 +72,7 @@
                   trigger="manual"
                   v-model="popover.visible">
         <div class="context-menu-popover">
-          Co-occurrence count: 
+          <!-- nothing here yet -->
         </div>
       </el-popover>
       
@@ -145,6 +154,7 @@ export default Vue.extend({
             width: 600,
             height: 600,
             depthLimit: 4,
+            cooccurrenceThreshold: 0,
             useRandomRoot: false,
             metrics: null as any,   // FIXME: type
             popover: {
@@ -166,10 +176,10 @@ export default Vue.extend({
     watch: {
         serializedQuery(newVal, oldVal) {
             log.debug("inside serialized query watcher");
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         currentRoot(newVal: string, oldVal: string) {
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         chosenRoot(newVal: string, oldVal: string) {
             this.recenter(newVal);
@@ -243,7 +253,10 @@ export default Vue.extend({
             this.activeApiCalls--;
         },
         depthChanged() {
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);            
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
+        },
+        thresholdChanged() {
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         handleCentralityClick(row: any, column: any, cell: any, event: MouseEvent) {
             if (column.property === 'node') {
@@ -266,13 +279,15 @@ export default Vue.extend({
             });
 
         },
-        respondToQueryNotDebounced(currentRoot: string, query: QuerySpec[], depthLimit: number) {
+        respondToQueryNotDebounced(
+            currentRoot: string, query: QuerySpec[], depthLimit: number,
+            cooccurrenceThreshold: number
+        ) {
             log.debug("responding to query");
 
             this.gateway.submitTokenQuery(
-                this.currentRoot, 
-                processQuery(this.serializedQuery),
-                this.depthLimit
+                currentRoot, processQuery(this.serializedQuery),
+                depthLimit, cooccurrenceThreshold
             ).then(r => {
                 this.graphData = r.data;
             });
@@ -370,13 +385,9 @@ body {
 }
 
 .metrics {
+    margin-top: 1.6em;
     margin-bottom: 1.6em;
 }
-
-.depth-limit {
-    margin-bottom: 1.6em;
-}
-
 
 // not very principled
 .label {
