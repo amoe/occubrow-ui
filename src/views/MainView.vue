@@ -1,22 +1,81 @@
 <template>
 <div class="page">
+  <span v-loading.fullscreen.lock="fullscreenLoading"></span>
+  
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
   
-  <el-popover placement="bottom"
-              :title="popoverTitle"
-              width="200"
-              trigger="manual"
-              v-model="popoverVisible">
-    <div v-for="sentence in displayedContexts">
-      <span v-for="token in sentence.content">
-        <span v-on:click="recenter(token)"
-              class="context-token">{{token}}</span>&nbsp;
-      </span>
-    </div>
-  </el-popover>
-  
   <el-row>
-    <el-col :span="11">
+    <el-col :span="5">
+      <div class="left-panel">
+        <div>
+          <span class="label">Root token</span>
+          <el-select v-model="chosenRoot"
+                     id="root-selector"
+                     filterable
+                     remote
+                     placeholder="Search tokens..."
+                     :remote-method="remoteMethod"
+                     :loading="loading">
+            <el-option v-for="item in filteredTokenSelection"
+                       :key="item"
+                       :label="item"
+                       :value="item">
+            </el-option>
+          </el-select>
+        </div>
+        
+        <div class="depth-limit">
+          <span class="label">Depth limit</span>
+          
+          <el-input-number v-model="depthLimit"
+                           v-on:change="depthChanged"
+                           label="Depth limit"
+                           :min="1"
+                           :max="10"></el-input-number>
+        </div>
+
+        <div class="cooccurrence-threshold">
+          <span class="label">Threshold</span>
+          
+          <el-input-number v-model="cooccurrenceThreshold"
+                           v-on:change="thresholdChanged"
+                           label="Coocurrence threshold"
+                           :min="0"
+                           :max="100"></el-input-number>
+        </div>
+        
+        <div v-if="metrics" class="metrics">
+          <span>Graph order: {{metrics.order}}.</span>&nbsp;
+          <span>Size: {{metrics.size}}.</span>&nbsp;
+        </div>
+        
+        <el-table :data="roundedCentralityData"
+                  v-on:cell-click="handleCentralityClick"> 
+          <el-table-column prop="node" class-name="clickable-table-datum"
+                           label="Token"></el-table-column>
+          <el-table-column prop="centrality" label="Centrality"></el-table-column>
+        </el-table>
+        
+        
+        <div class="history-list">
+          <span v-for="datum in rootHistoryTable">
+            <chevrons-right/>
+            <span class="clickable-history-datum" v-on:click="recenter(datum.token)">{{datum.token}}</span>
+          </span> 
+        </div>
+      </div>
+    </el-col>
+    
+    <el-col :span="11" :push="2">
+      <el-popover placement="bottom"
+                  :title="popover.title"
+                  trigger="manual"
+                  v-model="popover.visible">
+        <div class="context-menu-popover">
+          <!-- nothing here yet -->
+        </div>
+      </el-popover>
+      
       <svg id="svg-frame" :width="800" :height="800">
         <graph-view v-if="isDataLoaded"
                     v-on:node-clicked="handleNodeClicked"
@@ -32,54 +91,18 @@
                     ref="graphView"></graph-view>
       </svg>
     </el-col>
-    <el-col :span="12">
-      <div class="side-panel">
-        <div>
-          <span class="label">Root token</span>
-          <el-select v-model="chosenRoot"
-                     id="root-selector"
-                     filterable
-                     remote
-                     placeholder="Search tokens..."
-                     :remote-method="remoteMethod"
-                     :loading="loading">
-            <el-option v-for="item in filteredTokenSelection"
-                       :key="item"
-                       :label="item"
-                       :value="item">
-            </el-option>
-        </el-select>
-          </div>
-
-        <div class="depth-limit">
-          <span class="label">Depth limit</span>
-          
-        <el-input-number v-model="depthLimit"
-                         v-on:change="depthChanged"
-                         label="Depth limit"
-                         class="what"
-                         :min="1"
-                         :max="10"></el-input-number>
-        </div>
-
-        <div v-if="metrics" class="metrics">
-          <span>Graph order: {{metrics.order}}.</span>&nbsp;
-          <span>Size: {{metrics.size}}.</span>&nbsp;
-        </div>
-        
-        <el-table :data="roundedCentralityData"
-                  v-on:cell-click="handleCentralityClick"> 
-          <el-table-column prop="node" class-name="clickable-table-datum"
-                           label="Token"></el-table-column>
-          <el-table-column prop="centrality" label="Centrality"></el-table-column>
-        </el-table>
-
-        
-        <div class="history-list">
-          <span v-for="datum in rootHistoryTable">
-            <chevrons-right/>
-            <span class="clickable-history-datum" v-on:click="recenter(datum.token)">{{datum.token}}</span>
-          </span> 
+    <el-col :span="5" :push="3">
+      <div class="right-panel">
+        <div class="sentence-contexts">
+          <h2>Sentence contexts</h2>
+          <ul>
+            <li v-for="sentence in displayedContexts">
+              <span v-for="token in sentence.content">
+                <span v-on:click="recenter(token)"
+                      class="context-token">{{token}}</span>&nbsp;
+              </span>
+            </li>
+          </ul>
         </div>
       </div>
     </el-col>
@@ -94,7 +117,7 @@ import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
 import {mapGetters} from 'vuex';
 import mc from '@/mutation-constants';
-import api from '@/lib/data';
+import {DataGateway} from '@/lib/data';
 import {
     TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec, Sentence,
     GraphViewComponent, CentralityDatum, HistoryDatum
@@ -103,24 +126,23 @@ import {isWidgetViewComponent, isGraphViewComponent} from '@/type-guards';
 import {last} from '@/util';
 import {debounce} from 'lodash';
 import * as log from 'loglevel';
- import ChevronsRight from '@/components/ChevronsRight.vue';
+import ChevronsRight from '@/components/ChevronsRight.vue';
+import {AxiosError} from 'axios';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 function processQuery(query: QuerySpec[] ): string[] {
     console.log("serialized query in was %o", query);
-
+    
     const result1 = query.map(s => last(s.selectedPath));
     const result2 = result1.filter(p => p !== undefined);
-
+    
     console.log("processed result is %o", result2);
     return result2;
 }
 
 const QUERY_DEBOUNCE_TIMEOUT = 10000;
-
-const foo = {"Occupation":{"children":[{"content":"Transport","id":4105,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Transport/1"},{"content":"Manage","id":4101,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Manage/1"},{"content":"Drive","id":4102,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Drive/1"},{"content":"Serve","id":4103,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Serve/1"}],"content":"Occupation","id":4104,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Occupation/1"},"Place":{"children":[{"content":"Pub","id":4107,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Pub/1"},{"children":[{"content":"Clothes shop","id":4106,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes shop/1"}],"content":"Shop","id":4109,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Shop/1"}],"content":"Place","id":4108,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Place/1"},"Object":{"children":[{"content":"Clothes","id":4112,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Clothes/1"},{"content":"Alcoholic drink","id":4113,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Alcoholic drink/1"},{"content":"Vehicle","id":4110,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Vehicle/1"},{"content":"Bricks","id":4111,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Bricks/1"}],"content":"Object","id":4114,"label":"Taxon","uri":"tag:solasistim.net,2018-12-28:occubrow/Object/1"}};
 
 export default Vue.extend({
     components: {GraphView, WidgetView, ChevronsRight},
@@ -132,58 +154,82 @@ export default Vue.extend({
             width: 600,
             height: 600,
             depthLimit: 4,
+            cooccurrenceThreshold: 0,
             useRandomRoot: false,
             metrics: null as any,   // FIXME: type
-            popoverVisible: false,
-            popoverTitle: null as (string | null),
+            popover: {
+                visible: false,
+                title: null as (string | null),
+                count: 0 as number
+            },
             displayedContexts: [] as Sentence[],
             chosenRoot: null as (string | null),
             filteredTokenSelection: [] as string[],
             loading: false,
-            centralityData: [] as CentralityDatum[]
+            centralityData: [] as CentralityDatum[],
+            activeApiCalls: 0 as number,
+            // can't initialize here because we can't reference data or methods
+            // properly :/
+            dataGateway: null as DataGateway | null,
         };
     },
     watch: {
         serializedQuery(newVal, oldVal) {
             log.debug("inside serialized query watcher");
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         currentRoot(newVal: string, oldVal: string) {
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         chosenRoot(newVal: string, oldVal: string) {
             this.recenter(newVal);
         }
     },
     created() {
+        // have to initialize it here because of some quirks of typescript
+        this.dataGateway = new DataGateway(
+            this.onLoadingStarted,
+            this.onLoadingEnded,
+            (r: AxiosError) => {
+                const url = r.request.responseURL;
+                const error = r.request.statusText;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: url + ": " + error
+                });
+            }
+        );
+        
+        
         if (this.useRandomRoot) {
-            api.getRandomRoot().then(r => this.recenter(r.data));
+            this.gateway.getRandomRoot().then(r => this.recenter(r.data));
         }
         
         // We obviously don't want to ALWAYS apply the filter.  So the best option
         // would be to be able to register on some sort of getter in the module.
         
-        api.getTaxonomyRoots().then(r => {
+        this.gateway.getTaxonomyRoots().then(r => {
             const taxonomyList: TaxonomyRootDatum[] = r.data;
             
             for (let t of taxonomyList) {
                 const taxonomyName = t.content;
                 
-                api.getTaxonomy(taxonomyName).then(r => {
+                this.gateway.getTaxonomy(taxonomyName).then(r => {
                     Vue.set(this.taxonomies, taxonomyName, r.data);
                 });
             }
         });
         
-        api.getMetrics().then(r => {
+        this.gateway.getMetrics().then(r => {
             this.metrics = r.data;
         });
 
-        api.getAllTokens().then(r => {
+        this.gateway.getAllTokens().then(r => {
             this.filteredTokenSelection = r.data;
         });
 
-        api.getCentralityStatistics().then(r => {
+        this.gateway.getCentralityStatistics().then(r => {
             this.centralityData = r.data;
         });
     },
@@ -198,8 +244,19 @@ export default Vue.extend({
         // this.widgetView.addCompoundWidget();
     },
     methods: {
+        onLoadingStarted() {
+            console.log("loading started");
+            this.activeApiCalls++;
+        },
+        onLoadingEnded() {
+            console.log("loading ended");
+            this.activeApiCalls--;
+        },
         depthChanged() {
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);            
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
+        },
+        thresholdChanged() {
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         handleCentralityClick(row: any, column: any, cell: any, event: MouseEvent) {
             if (column.property === 'node') {
@@ -216,19 +273,21 @@ export default Vue.extend({
         },
         remoteMethod(substring: string) {
             this.loading = true;
-            api.searchTokens(substring).then(r => {
+            this.gateway.searchTokens(substring).then(r => {
                 this.filteredTokenSelection = r.data;
                 this.loading = false;
             });
 
         },
-        respondToQueryNotDebounced(currentRoot: string, query: QuerySpec[], depthLimit: number) {
+        respondToQueryNotDebounced(
+            currentRoot: string, query: QuerySpec[], depthLimit: number,
+            cooccurrenceThreshold: number
+        ) {
             log.debug("responding to query");
 
-            api.submitTokenQuery(
-                this.currentRoot, 
-                processQuery(this.serializedQuery),
-                this.depthLimit
+            this.gateway.submitTokenQuery(
+                currentRoot, processQuery(this.serializedQuery),
+                depthLimit, cooccurrenceThreshold
             ).then(r => {
                 this.graphData = r.data;
             });
@@ -236,15 +295,26 @@ export default Vue.extend({
         handleNodeClicked(node: any) {   // it's actually a GVNode
             this.$store.commit(mc.SET_ROOT, node.data.content);
 
-            this.popoverVisible = !this.popoverVisible;
-            this.popoverTitle = node.data.content;
+            this.popover.visible = !this.popover.visible;
+            this.popover.title = node.data.content;
+            this.popover.count = node.data.strength;
 
-            api.getContexts(node.data.content).then(r => {
+            this.gateway.getContexts(node.data.content).then(r => {
                 this.displayedContexts = r.data;
             });
         },
     },
     computed: {
+        fullscreenLoading(): boolean {
+            return this.activeApiCalls > 0;
+        },
+        gateway(): DataGateway {
+            if (this.dataGateway === null) {
+                throw new Error("somehow uninitialized");
+            }
+
+            return this.dataGateway;
+        },
         rootHistoryTable(): HistoryDatum[] {
             return this.$store.getters.rootHistoryTable;
         },
@@ -282,27 +352,6 @@ body {
     font-family: 'Oxygen', sans-serif;
 }
 
-#svg-frame {
-    /* This is used for accepting drag/drop between widget and graph. */
-    /* The svg frame is 'pinned', taken outside of the flow layout, and occupies 
-       the entire page. */
-    /*
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    left: 0px;
-    bottom: 0px;
-    width: 100vw;
-    height: 100vh;
-    */
-
-    /* It's gotta have such a z-index, otherwise it will block HTML items from
-       being interacted with. */
-    /*
-    z-index: -1;
-    */
-}
-
 .main-view-container {
     // stolen from tailwind shadow-md
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.12), 0 2px 4px 0 rgba(0,0,0,0.08);
@@ -322,7 +371,7 @@ body {
     margin-bottom: 1em;
 }
 
-.side-panel {
+.left-panel {
     margin-top: 1.6em;
 }
 
@@ -336,17 +385,26 @@ body {
 }
 
 .metrics {
+    margin-top: 1.6em;
     margin-bottom: 1.6em;
 }
-
-.depth-limit {
-    margin-bottom: 1.6em;
-}
-
 
 // not very principled
 .label {
     display: inline-block;
     width: 130px;
+}
+
+.right-panel {
+    margin-top: 1.6em;
+}
+
+.context-menu-popover {
+    // styling for context menu
+}
+
+.sentence-contexts {
+    max-height: 80ex;
+    overflow-y: scroll;
 }
 </style>
