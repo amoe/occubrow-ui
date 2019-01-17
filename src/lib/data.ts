@@ -1,16 +1,32 @@
 import { TreeNode, QuerySpec } from '@/types';
-import axios, { AxiosPromise } from 'axios';
+import axios, { AxiosPromise, AxiosError, AxiosResponse } from 'axios';
 import * as log from 'loglevel';
 
 // data is a terrible name for this
 
+
 export class DataGateway {
-    // loadingStarted: Function;
-    // loadingEnded: Function;
+    loadingStarted: Function;
+    loadingEnded: Function;
     errorReporter: Function;
 
-    constructor(errorReporter: Function) {
+    constructor(
+        loadingStarted: Function, loadingEnded: Function, errorReporter: Function
+    ) {
+        this.loadingStarted = loadingStarted;
+        this.loadingEnded = loadingEnded;
         this.errorReporter = errorReporter;
+    }
+
+    makeApiCall(endpoint: string, params: any): AxiosPromise {
+        this.loadingStarted();
+        return axios.get("/api" + endpoint, params).then((r: any) => {
+            this.loadingEnded();
+            return r;
+        }).catch((r: AxiosError) => {
+            this.loadingEnded();
+            this.errorReporter(r);
+        });
     }
 
     getRandomRoot(): AxiosPromise {
@@ -34,16 +50,14 @@ export class DataGateway {
     }
 
     submitTokenQuery(token: string, query: string[], depthLimit: number): AxiosPromise {
-        log.debug("i would submit query %o", query);
-        return axios.get(
-            "/api/query", {
+        return this.makeApiCall(
+            "/query", {
                 params: {
-                    'root': token,
-                    'filter': query,
-                    'depth_limit': depthLimit
+                    'root': token, 'filter': query, 'depth_limit': depthLimit
                 }
             }
-        ).catch(r => this.errorReporter(r));
+        );
+
     }
 
     getAllTokens(): AxiosPromise {

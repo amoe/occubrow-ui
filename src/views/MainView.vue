@@ -1,5 +1,7 @@
 <template>
 <div class="page">
+  <span v-loading.fullscreen.lock="fullscreenLoading"></span>
+
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
   
   <el-row>
@@ -98,7 +100,7 @@
 </template>
 
 <script lang="ts">
-    import Vue from 'vue';
+import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
@@ -150,15 +152,10 @@ export default Vue.extend({
             filteredTokenSelection: [] as string[],
             loading: false,
             centralityData: [] as CentralityDatum[],
-            gateway: new DataGateway((r: AxiosError) => {
-                const url = r.request.responseURL;
-                const error = r.request.statusText;
-
-                this.$notify.error({
-                    title: 'Error',
-                    message: url + ": " + error
-                });
-            })
+            activeApiCalls: 0 as number,
+            // can't initialize here because we can't reference data or methods
+            // properly :/
+            dataGateway: null as DataGateway | null,
         };
     },
     watch: {
@@ -174,6 +171,21 @@ export default Vue.extend({
         }
     },
     created() {
+        this.dataGateway = new DataGateway(
+            this.onLoadingStarted,
+            this.onLoadingEnded,
+            (r: AxiosError) => {
+                const url = r.request.responseURL;
+                const error = r.request.statusText;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: url + ": " + error
+                });
+            }
+        );
+        
+        
         if (this.useRandomRoot) {
             this.gateway.getRandomRoot().then(r => this.recenter(r.data));
         }
@@ -216,6 +228,14 @@ export default Vue.extend({
         // this.widgetView.addCompoundWidget();
     },
     methods: {
+        onLoadingStarted() {
+            console.log("loading started");
+            this.activeApiCalls++;
+        },
+        onLoadingEnded() {
+            console.log("loading ended");
+            this.activeApiCalls--;
+        },
         depthChanged() {
             this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit);            
         },
@@ -263,6 +283,16 @@ export default Vue.extend({
         },
     },
     computed: {
+        fullscreenLoading(): boolean {
+            return this.activeApiCalls > 0;
+        },
+        gateway(): DataGateway {
+            if (this.dataGateway === null) {
+                throw new Error("somehow uninitialized");
+            }
+
+            return this.dataGateway;
+        },
         rootHistoryTable(): HistoryDatum[] {
             return this.$store.getters.rootHistoryTable;
         },
