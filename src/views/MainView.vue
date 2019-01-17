@@ -1,7 +1,7 @@
 <template>
 <div class="page">
   <span v-loading.fullscreen.lock="fullscreenLoading"></span>
-
+  
   <widget-view :taxonomies="taxonomies" ref="widgetView"></widget-view>
   
   <el-row>
@@ -59,11 +59,11 @@
     
     <el-col :span="11" :push="2">
       <el-popover placement="bottom"
-                  :title="popoverTitle"
+                  :title="popover.title"
                   trigger="manual"
-                  v-model="popoverVisible">
+                  v-model="popover.visible">
         <div class="context-menu-popover">
-          Context Menu
+          Co-occurrence count: 
         </div>
       </el-popover>
       
@@ -84,15 +84,17 @@
     </el-col>
     <el-col :span="5" :push="3">
       <div class="right-panel">
-        <h2>Sentence contexts</h2>
-        <ul>
-          <li v-for="sentence in displayedContexts">
-            <span v-for="token in sentence.content">
-              <span v-on:click="recenter(token)"
-                    class="context-token">{{token}}</span>&nbsp;
-            </span>
-          </li>
-        </ul>
+        <div class="sentence-contexts">
+          <h2>Sentence contexts</h2>
+          <ul>
+            <li v-for="sentence in displayedContexts">
+              <span v-for="token in sentence.content">
+                <span v-on:click="recenter(token)"
+                      class="context-token">{{token}}</span>&nbsp;
+              </span>
+            </li>
+          </ul>
+        </div>
       </div>
     </el-col>
   </el-row>
@@ -145,8 +147,11 @@ export default Vue.extend({
             depthLimit: 4,
             useRandomRoot: false,
             metrics: null as any,   // FIXME: type
-            popoverVisible: false,
-            popoverTitle: null as (string | null),
+            popover: {
+                visible: false,
+                title: null as (string | null),
+                count: 0 as number
+            },
             displayedContexts: [] as Sentence[],
             chosenRoot: null as (string | null),
             filteredTokenSelection: [] as string[],
@@ -275,8 +280,9 @@ export default Vue.extend({
         handleNodeClicked(node: any) {   // it's actually a GVNode
             this.$store.commit(mc.SET_ROOT, node.data.content);
 
-            this.popoverVisible = !this.popoverVisible;
-            this.popoverTitle = node.data.content;
+            this.popover.visible = !this.popover.visible;
+            this.popover.title = node.data.content;
+            this.popover.count = node.data.strength;
 
             this.gateway.getContexts(node.data.content).then(r => {
                 this.displayedContexts = r.data;
@@ -329,27 +335,6 @@ export default Vue.extend({
 body {
     background-color: #fdfdfd;
     font-family: 'Oxygen', sans-serif;
-}
-
-#svg-frame {
-    /* This is used for accepting drag/drop between widget and graph. */
-    /* The svg frame is 'pinned', taken outside of the flow layout, and occupies 
-       the entire page. */
-    /*
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    left: 0px;
-    bottom: 0px;
-    width: 100vw;
-    height: 100vh;
-    */
-
-    /* It's gotta have such a z-index, otherwise it will block HTML items from
-       being interacted with. */
-    /*
-    z-index: -1;
-    */
 }
 
 .main-view-container {
@@ -405,5 +390,10 @@ body {
 
 .context-menu-popover {
     // styling for context menu
+}
+
+.sentence-contexts {
+    max-height: 80ex;
+    overflow-y: scroll;
 }
 </style>
