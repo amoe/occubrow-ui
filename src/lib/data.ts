@@ -4,22 +4,35 @@ import * as log from 'loglevel';
 
 // data is a terrible name for this
 
-const api = {
+export class DataGateway {
+    // loadingStarted: Function;
+    // loadingEnded: Function;
+    errorReporter: Function;
+
+    constructor(errorReporter: Function) {
+        this.errorReporter = errorReporter;
+    }
+
     getRandomRoot(): AxiosPromise {
-        return axios.get("/api/random-root");
-    },
+        return axios.get("/api/random-root").catch(r => this.errorReporter(r));
+    }
+
     getMetrics(): AxiosPromise {
-        return axios.get("/api/metrics");
-    },
+        return axios.get("/api/metrics").catch(r => this.errorReporter(r));
+    }
+
     getTaxonomy(root: string): AxiosPromise {
-        return axios.get("/api/taxonomy", { params: { root } });
-    },
+        return axios.get("/api/taxonomy", { params: { root } }).catch(r => this.errorReporter(r));
+    }
+
     getTaxonomyRoots(): AxiosPromise {
-        return axios.get("/api/taxonomy-roots");
-    },
+        return axios.get("/api/taxonomy-roots").catch(r => this.errorReporter(r));
+    }
+
     getContexts(token: string): AxiosPromise {
-        return axios.get("/api/contexts", { params: { token } });
-    },
+        return axios.get("/api/contexts", { params: { token } }).catch(r => this.errorReporter(r));
+    }
+
     submitTokenQuery(token: string, query: string[], depthLimit: number): AxiosPromise {
         log.debug("i would submit query %o", query);
         return axios.get(
@@ -30,17 +43,18 @@ const api = {
                     'depth_limit': depthLimit
                 }
             }
-        );
-    },
-    getAllTokens(): AxiosPromise {
-        return axios.get("/api/tokens", {});
-    },
-    searchTokens(substring: string): AxiosPromise {
-        return axios.get("/api/tokens", { params: { substring } });
-    },
-    getCentralityStatistics(): AxiosPromise {
-        return axios.get("/api/centrality", {});
+        ).catch(r => this.errorReporter(r));
     }
-};
 
-export default api;
+    getAllTokens(): AxiosPromise {
+        return axios.get("/api/tokens", {}).catch(r => this.errorReporter(r));
+    }
+
+    searchTokens(substring: string): AxiosPromise {
+        return axios.get("/api/tokens", { params: { substring } }).catch(r => this.errorReporter(r));
+    }
+
+    getCentralityStatistics(): AxiosPromise {
+        return axios.get("/api/centrality", {}).catch(r => this.errorReporter(r));
+    }
+}

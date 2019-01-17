@@ -98,13 +98,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+    import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
 import {mapGetters} from 'vuex';
 import mc from '@/mutation-constants';
-import api from '@/lib/data';
+import {DataGateway} from '@/lib/data';
 import {
     TreeNode, WidgetViewComponent, TaxonomyRootDatum, QuerySpec, Sentence,
     GraphViewComponent, CentralityDatum, HistoryDatum
@@ -113,17 +113,18 @@ import {isWidgetViewComponent, isGraphViewComponent} from '@/type-guards';
 import {last} from '@/util';
 import {debounce} from 'lodash';
 import * as log from 'loglevel';
- import ChevronsRight from '@/components/ChevronsRight.vue';
+import ChevronsRight from '@/components/ChevronsRight.vue';
+import {AxiosError} from 'axios';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 function processQuery(query: QuerySpec[] ): string[] {
     console.log("serialized query in was %o", query);
-
+    
     const result1 = query.map(s => last(s.selectedPath));
     const result2 = result1.filter(p => p !== undefined);
-
+    
     console.log("processed result is %o", result2);
     return result2;
 }
@@ -148,7 +149,16 @@ export default Vue.extend({
             chosenRoot: null as (string | null),
             filteredTokenSelection: [] as string[],
             loading: false,
-            centralityData: [] as CentralityDatum[]
+            centralityData: [] as CentralityDatum[],
+            gateway: new DataGateway((r: AxiosError) => {
+                const url = r.request.responseURL;
+                const error = r.request.statusText;
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: url + ": " + error
+                });
+            })
         };
     },
     watch: {
@@ -165,33 +175,33 @@ export default Vue.extend({
     },
     created() {
         if (this.useRandomRoot) {
-            api.getRandomRoot().then(r => this.recenter(r.data));
+            this.gateway.getRandomRoot().then(r => this.recenter(r.data));
         }
         
         // We obviously don't want to ALWAYS apply the filter.  So the best option
         // would be to be able to register on some sort of getter in the module.
         
-        api.getTaxonomyRoots().then(r => {
+        this.gateway.getTaxonomyRoots().then(r => {
             const taxonomyList: TaxonomyRootDatum[] = r.data;
             
             for (let t of taxonomyList) {
                 const taxonomyName = t.content;
                 
-                api.getTaxonomy(taxonomyName).then(r => {
+                this.gateway.getTaxonomy(taxonomyName).then(r => {
                     Vue.set(this.taxonomies, taxonomyName, r.data);
                 });
             }
         });
         
-        api.getMetrics().then(r => {
+        this.gateway.getMetrics().then(r => {
             this.metrics = r.data;
         });
 
-        api.getAllTokens().then(r => {
+        this.gateway.getAllTokens().then(r => {
             this.filteredTokenSelection = r.data;
         });
 
-        api.getCentralityStatistics().then(r => {
+        this.gateway.getCentralityStatistics().then(r => {
             this.centralityData = r.data;
         });
     },
@@ -224,7 +234,7 @@ export default Vue.extend({
         },
         remoteMethod(substring: string) {
             this.loading = true;
-            api.searchTokens(substring).then(r => {
+            this.gateway.searchTokens(substring).then(r => {
                 this.filteredTokenSelection = r.data;
                 this.loading = false;
             });
@@ -233,7 +243,7 @@ export default Vue.extend({
         respondToQueryNotDebounced(currentRoot: string, query: QuerySpec[], depthLimit: number) {
             log.debug("responding to query");
 
-            api.submitTokenQuery(
+            this.gateway.submitTokenQuery(
                 this.currentRoot, 
                 processQuery(this.serializedQuery),
                 this.depthLimit
@@ -247,7 +257,7 @@ export default Vue.extend({
             this.popoverVisible = !this.popoverVisible;
             this.popoverTitle = node.data.content;
 
-            api.getContexts(node.data.content).then(r => {
+            this.gateway.getContexts(node.data.content).then(r => {
                 this.displayedContexts = r.data;
             });
         },
