@@ -127,18 +127,21 @@ import {last} from '@/util';
 import {debounce} from 'lodash';
 import * as log from 'loglevel';
 import ChevronsRight from '@/components/ChevronsRight.vue';
-import {AxiosError} from 'axios';
+import {SAMPLE_QUERY} from '@/sample-query';
+
+// Not sure if we should need this, possibly it should be shimmed
+import axios, {AxiosError} from 'axios';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 function processQuery(query: QuerySpec[] ): string[] {
-    console.log("serialized query in was %o", query);
+    log.debug("serialized query in was %o", query);
     
     const result1 = query.map(s => last(s.selectedPath));
     const result2 = result1.filter(p => p !== undefined);
     
-    console.log("processed result is %o", result2);
+    log.debug("processed result is %o", result2);
     return result2;
 }
 
@@ -186,6 +189,21 @@ export default Vue.extend({
         }
     },
     created() {
+        console.log("inside created hook");
+
+        axios.post("/api/micromacro-query", SAMPLE_QUERY).then((r: any) => {
+            console.log("succeed");
+            axios.get("/api/micromacro-query/1").then((r: any) => {
+                console.log("succeed2");
+                console.log("data is %o", JSON.stringify(r.data));
+                this.graphData = r.data;
+            });
+        }).catch((r: AxiosError) => {
+            console.log("error");
+            // this.errorReporter(r);
+        });
+        
+
         // have to initialize it here because of some quirks of typescript
         this.dataGateway = new DataGateway(
             this.onLoadingStarted,
@@ -245,18 +263,23 @@ export default Vue.extend({
     },
     methods: {
         onLoadingStarted() {
-            console.log("loading started");
+            log.debug("loading started");
             this.activeApiCalls++;
         },
         onLoadingEnded() {
-            console.log("loading ended");
+            log.debug("loading ended");
             this.activeApiCalls--;
         },
         depthChanged() {
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
+            this.respondToQueryNotDebounced(
+                this.currentRoot, this.serializedQuery, this.depthLimit, 
+                this.cooccurrenceThreshold
+            );
         },
         thresholdChanged() {
-            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
+            this.respondToQueryNotDebounced(
+                this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold
+            );
         },
         handleCentralityClick(row: any, column: any, cell: any, event: MouseEvent) {
             if (column.property === 'node') {

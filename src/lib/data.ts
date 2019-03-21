@@ -56,7 +56,6 @@ export class DataGateway {
                 'cooccurrence_threshold': cooccurrenceThreshold
             }
         );
-
     }
 
     getAllTokens(): AxiosPromise {
