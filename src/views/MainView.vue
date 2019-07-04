@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts">
-    import Vue from 'vue';
+import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
@@ -127,21 +127,18 @@ import {last} from '@/util';
 import {debounce} from 'lodash';
 import * as log from 'loglevel';
 import ChevronsRight from '@/components/ChevronsRight.vue';
-import {SAMPLE_QUERY} from '@/sample-query';
-
-// Not sure if we should need this, possibly it should be shimmed
-import axios, {AxiosError} from 'axios';
+import {AxiosError} from 'axios';
 
 import 'occubrow-graph-view/dist/occubrow-graph-view.css';
 import 'amoe-butterworth-widgets/dist/amoe-butterworth-widgets.css';
 
 function processQuery(query: QuerySpec[] ): string[] {
-    log.debug("serialized query in was %o", query);
+    console.log("serialized query in was %o", query);
     
     const result1 = query.map(s => last(s.selectedPath));
     const result2 = result1.filter(p => p !== undefined);
     
-    log.debug("processed result is %o", result2);
+    console.log("processed result is %o", result2);
     return result2;
 }
 
@@ -189,9 +186,6 @@ export default Vue.extend({
         }
     },
     created() {
-        console.log("inside created hook");
-        
-        
         // have to initialize it here because of some quirks of typescript
         this.dataGateway = new DataGateway(
             this.onLoadingStarted,
@@ -230,11 +224,11 @@ export default Vue.extend({
         this.gateway.getMetrics().then(r => {
             this.metrics = r.data;
         });
-        
+
         this.gateway.getAllTokens().then(r => {
             this.filteredTokenSelection = r.data;
         });
-        
+
         this.gateway.getCentralityStatistics().then(r => {
             this.centralityData = r.data;
         });
@@ -251,23 +245,18 @@ export default Vue.extend({
     },
     methods: {
         onLoadingStarted() {
-            log.debug("loading started");
+            console.log("loading started");
             this.activeApiCalls++;
         },
         onLoadingEnded() {
-            log.debug("loading ended");
+            console.log("loading ended");
             this.activeApiCalls--;
         },
         depthChanged() {
-            this.respondToQueryNotDebounced(
-                this.currentRoot, this.serializedQuery, this.depthLimit, 
-                this.cooccurrenceThreshold
-            );
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         thresholdChanged() {
-            this.respondToQueryNotDebounced(
-                this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold
-            );
+            this.respondToQueryNotDebounced(this.currentRoot, this.serializedQuery, this.depthLimit, this.cooccurrenceThreshold);
         },
         handleCentralityClick(row: any, column: any, cell: any, event: MouseEvent) {
             if (column.property === 'node') {
@@ -288,26 +277,9 @@ export default Vue.extend({
                 this.filteredTokenSelection = r.data;
                 this.loading = false;
             });
-            
+
         },
         respondToQueryNotDebounced(
-            currentRoot: string, query: QuerySpec[], depthLimit: number,
-            cooccurrenceThreshold: number
-        ) {
-            axios.post("/api/micromacro-query", SAMPLE_QUERY).then((r: any) => {
-                console.log("succeed");
-                axios.get("/api/micromacro-query/1", {params: {'depth_limit': depthLimit}}).then((r: any) => {
-                    console.log("succeed2");
-                    console.log("data is %o", JSON.stringify(r.data));
-                    this.graphData = r.data;
-                });
-            }).catch((r: AxiosError) => {
-                console.log("error");
-                // this.errorReporter(r);
-            });
-        },
-        // version calling out to the more regular API
-        respondToQueryNotDebounced_original(
             currentRoot: string, query: QuerySpec[], depthLimit: number,
             cooccurrenceThreshold: number
         ) {
