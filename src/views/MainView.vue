@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+    import Vue from 'vue';
 import {GraphView} from 'occubrow-graph-view';
 import {WidgetView} from 'amoe-butterworth-widgets';
 import TreeModel from 'tree-model';
@@ -224,11 +224,11 @@ export default Vue.extend({
         this.gateway.getMetrics().then(r => {
             this.metrics = r.data;
         });
-
+        
         this.gateway.getAllTokens().then(r => {
             this.filteredTokenSelection = r.data;
         });
-
+        
         this.gateway.getCentralityStatistics().then(r => {
             this.centralityData = r.data;
         });
@@ -277,18 +277,25 @@ export default Vue.extend({
                 this.filteredTokenSelection = r.data;
                 this.loading = false;
             });
-
+            
         },
         respondToQueryNotDebounced(
             currentRoot: string, query: QuerySpec[], depthLimit: number,
             cooccurrenceThreshold: number
         ) {
             log.debug("responding to query");
-
+            
             this.gateway.submitTokenQuery(
                 currentRoot, processQuery(this.serializedQuery),
                 depthLimit, cooccurrenceThreshold
             ).then(r => {
+                if (r.data === null) {
+                    this.$notify.info({
+                        title: 'Info',
+                        message: "No data loaded."
+                    });
+                }
+
                 this.graphData = r.data;
             });
         },
