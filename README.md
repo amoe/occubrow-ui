@@ -1,7 +1,7 @@
 # occubrow-ui
 
 This is the UI for Occubrow.  It should be used in combination with
-the [backend](/amoe/occubrow-backend).
+the [backend](https://github.com/amoe/occubrow-backend).
 
 ## Project setup
 ```
