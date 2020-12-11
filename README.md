@@ -1,5 +1,7 @@
 # occubrow-ui
 
+This is the UI for Occubrow.
+
 ## Project setup
 ```
 npm install
