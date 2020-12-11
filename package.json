@@ -11,7 +11,7 @@
   "dependencies": {
     "amoe-butterworth-widgets": "0.7.0",
     "element-ui": "2.4.11",
-    "lodash": "4.17.11",
+    "lodash": "4.17.19",
     "occubrow-graph-view": "0.7.0",
     "typeface-oxygen": "0.0.54",
     "vue": "2.5.17",
